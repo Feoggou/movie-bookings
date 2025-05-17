@@ -26,4 +26,5 @@ FetchContent_MakeAvailable(googletest)
 
 # Include sub-projects.
 add_subdirectory ("MovieBooking")
+add_subdirectory ("lib")
 add_subdirectory ("tests")
