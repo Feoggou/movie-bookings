@@ -77,6 +77,11 @@
             "description": "",
             "displayName": "",
             "configurePreset": "x64-debug"
+        },
+        {
+            "name": "build-doc",
+            "configurePreset": "x64-debug",
+            "targets": [ "doc" ]
         }
     ]
 }

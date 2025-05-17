@@ -18,8 +18,18 @@ find_package(GTest REQUIRED)
 message(STATUS "Found GTest version: ${GTest_VERSION}")
 find_package(ZeroMQ CONFIG REQUIRED)
 message(STATUS "Found ZeroMQ version: ${ZeroMQ_VERSION}")
+find_package(Doxygen REQUIRED)
 
 # Include sub-projects.
 add_subdirectory ("MovieBooking")
 add_subdirectory ("lib")
 add_subdirectory ("tests")
+
+add_custom_target(doc
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating documentation with Doxygen"
+    VERBATIM
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs/html DESTINATION share/doc)
