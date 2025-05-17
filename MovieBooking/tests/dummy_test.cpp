@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include "movie_booking.h"
+
+#include "mbooking/movie_booking.h"
 
 
 TEST(HelloTest, BasicAssertions)
