@@ -1,7 +1,7 @@
 #include "mbooking/movie_booking.h"
 #include <iostream>
 
-void foo()
+bool foo(int x)
 {
-	std::cout << "Foo called!" << std::endl;
+	std::cout << "Foo called: x=" << x << std::endl;
 }
