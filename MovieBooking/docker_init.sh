@@ -18,6 +18,7 @@ cd external
 
 git clone https://github.com/microsoft/vcpkg.git
 cd vcpkg
+git checkout 2025.04.09
 
 ./bootstrap-vcpkg.sh
 ./vcpkg install
