@@ -5,6 +5,7 @@ add_executable(dummy_test dummy_test.cpp)
 
 target_link_libraries(
   dummy_test
+  PRIVATE
   MovieBookingLib
   GTest::gtest_main
 )

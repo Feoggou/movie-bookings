@@ -9,3 +9,5 @@ CMakeDeps
 
 [options]
 fmt/10.1.1:header_only=True
+zeromq/*:shared=True
+gtest/*:shared=False

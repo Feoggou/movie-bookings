@@ -14,10 +14,11 @@ project ("MovieBooking")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(GTest REQUIRED)
+find_package(GTest CONFIG REQUIRED)
 message(STATUS "Found GTest version: ${GTest_VERSION}")
 find_package(ZeroMQ CONFIG REQUIRED)
 message(STATUS "Found ZeroMQ version: ${ZeroMQ_VERSION}")
+
 find_package(Doxygen REQUIRED)
 
 # Include sub-projects.

@@ -9,5 +9,4 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET MovieBooking PROPERTY CXX_STANDARD 20)
 endif()
 
-target_link_libraries(MovieBooking PRIVATE MovieBookingLib libzmq libzmq-static)
-
+target_link_libraries(MovieBooking PRIVATE MovieBookingLib libzmq)
