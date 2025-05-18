@@ -4,4 +4,5 @@
 bool foo(int x)
 {
 	std::cout << "Foo called: x=" << x << std::endl;
+	return 0;
 }

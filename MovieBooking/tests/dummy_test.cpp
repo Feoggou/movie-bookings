@@ -5,7 +5,7 @@
 
 TEST(HelloTest, BasicAssertions)
 {
-	foo();
+	bool b = foo(-4);
 
 	EXPECT_STRNE("hello", "world");
 	EXPECT_EQ(7 * 6, 42);

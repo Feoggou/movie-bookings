@@ -1,5 +1,10 @@
 {
     "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 28,
+        "patch": 0
+    },
     "configurePresets": [
         {
             "name": "windows-base",
@@ -9,6 +14,7 @@
             "installDir": "${sourceDir}/out/install/${presetName}",
             "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
             "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
             },
             "environment": {
                 "VCPKG_ROOT": "external/vcpkg"
@@ -20,7 +26,38 @@
             }
         },
         {
-            "name": "x64-debug",
+            "name": "linux-base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+            },
+            "environment": {
+                "VCPKG_ROOT": "external/vcpkg"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "linux-x64-debug",
+            "displayName": "x64 Debug",
+            "inherits": "linux-base",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "win-x64-debug",
             "displayName": "x64 Debug",
             "inherits": "windows-base",
             "architecture": {
@@ -32,15 +69,15 @@
             }
         },
         {
-            "name": "x64-release",
+            "name": "win-x64-release",
             "displayName": "x64 Release",
-            "inherits": "x64-debug",
+            "inherits": "win-x64-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
-            "name": "x86-debug",
+            "name": "win-x86-debug",
             "displayName": "x86 Debug",
             "inherits": "windows-base",
             "architecture": {
@@ -52,9 +89,9 @@
             }
         },
         {
-            "name": "x86-release",
+            "name": "win-x86-release",
             "displayName": "x86 Release",
-            "inherits": "x86-debug",
+            "inherits": "win-x86-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
@@ -73,14 +110,25 @@
     ],
     "buildPresets": [
         {
-            "name": "x64 Debug",
+            "name": "win-x64-debug",
             "description": "",
-            "displayName": "",
-            "configurePreset": "x64-debug"
+            "displayName": "Win x64 Debug",
+            "configurePreset": "win-x64-debug"
         },
         {
-            "name": "build-doc",
-            "configurePreset": "x64-debug",
+            "name": "linux-x64-debug",
+            "description": "",
+            "displayName": "Linux x64 Debug",
+            "configurePreset": "linux-x64-debug"
+        },
+        {
+            "name": "win-build-doc",
+            "configurePreset": "win-x64-debug",
+            "targets": [ "doc" ]
+        },
+        {
+            "name": "linux-build-doc",
+            "configurePreset": "linux-x64-debug",
             "targets": [ "doc" ]
         }
     ]
