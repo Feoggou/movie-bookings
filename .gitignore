@@ -2,4 +2,5 @@
 out/
 docs_build/
 conan-cmake-modules/
+CMakeUserPresets.json
 
