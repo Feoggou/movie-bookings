@@ -25,3 +25,7 @@ compiler.runtime=dynamic
 compiler.version=194
 os=Windows
 compiler.runtime=static
+
+
+cmake --preset conan-win64-debug
+cmake --build --preset conan-win64-debug

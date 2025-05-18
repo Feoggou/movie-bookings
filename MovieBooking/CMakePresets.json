@@ -45,6 +45,18 @@
             }
         },
         {
+            "name": "conan-win64-debug",
+            "hidden": false,
+            "binaryDir": "${sourceDir}/out/conan-build/${presetName}",
+            "installDir": "${sourceDir}/out/conan-install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/conan-cmake-modules/conan_toolchain.cmake",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl"
+            }
+        },
+        {
             "name": "docker-x64-debug-ubuntu",
             "cmakeExecutable": "./docker_preset.sh",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
@@ -134,6 +146,10 @@
             "description": "",
             "displayName": "Linux x64 Debug",
             "configurePreset": "linux-x64-debug"
+        },
+        {
+            "name": "conan-win64-debug",
+            "configurePreset": "conan-win64-debug"
         },
         {
             "name": "docker-x64-debug-ubuntu",
