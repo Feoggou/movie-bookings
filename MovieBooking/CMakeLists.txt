@@ -21,7 +21,7 @@ message(STATUS "Found ZeroMQ version: ${ZeroMQ_VERSION}")
 find_package(Doxygen REQUIRED)
 
 # Include sub-projects.
-add_subdirectory ("MovieBooking")
+add_subdirectory ("src")
 add_subdirectory ("lib")
 add_subdirectory ("tests")
 
