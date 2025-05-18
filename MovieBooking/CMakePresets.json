@@ -45,6 +45,15 @@
             }
         },
         {
+            "name": "docker-x64-debug-ubuntu",
+            "cmakeExecutable": "./docker_build.sh",
+            "generator": "Ninja",
+            "binaryDir": "build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
             "name": "linux-x64-debug",
             "displayName": "x64 Debug",
             "inherits": "linux-base",
@@ -122,14 +131,24 @@
             "configurePreset": "linux-x64-debug"
         },
         {
+            "name": "docker-x64-debug-ubuntu",
+            "description": "",
+            "displayName": "Docker build Linux x64 Debug",
+            "configurePreset": "docker-x64-debug-ubuntu"
+        },
+        {
             "name": "win-build-doc",
             "configurePreset": "win-x64-debug",
-            "targets": [ "doc" ]
+            "targets": [
+                "doc"
+            ]
         },
         {
             "name": "linux-build-doc",
             "configurePreset": "linux-x64-debug",
-            "targets": [ "doc" ]
+            "targets": [
+                "doc"
+            ]
         }
     ]
 }
