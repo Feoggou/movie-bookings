@@ -1,0 +1,11 @@
+[requires]
+fmt/10.1.1
+gtest/1.16.0
+zeromq/4.3.5
+
+[generators]
+CMakeToolchain
+CMakeDeps
+
+[options]
+fmt/10.1.1:header_only=True
