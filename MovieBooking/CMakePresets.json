@@ -17,7 +17,7 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
             },
             "environment": {
-                "VCPKG_ROOT": "external/vcpkg"
+                "VCPKG_ROOT": "${sourceDir}/external/vcpkg"
             },
             "condition": {
                 "type": "equals",
@@ -36,7 +36,7 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
             },
             "environment": {
-                "VCPKG_ROOT": "external/vcpkg"
+                "VCPKG_ROOT": "${sourceDir}/external/vcpkg"
             },
             "condition": {
                 "type": "equals",
@@ -46,11 +46,16 @@
         },
         {
             "name": "docker-x64-debug-ubuntu",
-            "cmakeExecutable": "./docker_build.sh",
-            "generator": "Ninja",
-            "binaryDir": "build",
+            "cmakeExecutable": "./docker_preset.sh",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+            },
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
             }
         },
         {
