@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker build -t movie-booking:latest .
+docker build -f Dockerfile -t movie-booking:latest .

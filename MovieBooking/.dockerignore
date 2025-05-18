@@ -1,0 +1,6 @@
+external/
+.vs/
+.vscode/
+docs_build/
+out/
+

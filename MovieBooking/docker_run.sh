@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-docker run --rm -it -v "$(pwd -W)":/project movie-booking:latest
+docker run --rm -t movie-booking:latest
 
