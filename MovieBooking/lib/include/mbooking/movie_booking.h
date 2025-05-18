@@ -3,14 +3,39 @@
  * @brief Utility functions for checking values.
  */
 
+#include <vector>
+#include <string>
+#include <memory>
+
+struct BookingBackend
+{
+public:
+    std::vector<std::string> movies = { "Movie A", "Movie B", "Movie C" };
+};
+
 
 /**
- * @brief Checks if x is negative or not.
+ * @brief MovieBookingService class
  *
- * This function takes an integer input and returns true if the value is
- * negative, and false otherwise.
- *
- * @param x Value to check.
- * @return true if x < 0, false otherwise.
+ * This class provides a service for booking movies.
  */
-bool foo(int x);
+class MovieBookingService
+{
+public:
+    MovieBookingService();
+
+    explicit MovieBookingService(std::unique_ptr<BookingBackend> &&backend);
+
+    /**
+     * @brief Get a list of currently playing movies.
+     *
+     * This function returns a vector of strings representing the titles of
+     * movies that are currently playing.
+     *
+     * @return A vector of strings containing the titles of currently playing movies.
+     */
+    std::vector<std::string> getPlayingMovies() const;
+
+private:
+    std::unique_ptr<BookingBackend> m_backend;
+};
