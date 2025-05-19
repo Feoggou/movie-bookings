@@ -33,3 +33,16 @@ TEST(MovieBooking, canGetOneMovie)
 	ASSERT_EQ(movies.size(), 1);
 	ASSERT_EQ(movies.at(0), "The Movie");
 }
+
+TEST(MovieBooking, canGetTwoMovies)
+{
+	auto store = std::make_unique<Store>();
+	store->movies = { "Movie A", "Movie B" };
+
+	Service service(std::move(store));
+	std::vector<std::string> movies = service.getPlayingMovies();
+
+	ASSERT_EQ(movies.size(), 2);
+	ASSERT_EQ(movies.at(0), "Movie A");
+	ASSERT_EQ(movies.at(1), "Movie B");
+}
