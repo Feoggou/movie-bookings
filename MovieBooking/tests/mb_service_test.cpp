@@ -51,6 +51,13 @@ namespace {
 	{
 		return Service(makeStore(theatersByMovie));
 	}
+
+	inline Service makeMovieTheaterWithSeats(const std::string &movie, const std::string &theater, const std::vector<bool> &seats)
+	{
+		return Service(makeStore({
+			makeMovie(movie, { makeTheaterWithSeats(theater, seats), })
+			}));
+	}
 }
 
 
@@ -237,6 +244,28 @@ TEST(MovieBooking, whenTheaterIsEmptyReturnNoAvailableSeats)
 		});
 
 	std::vector<std::string> seats = service.getAvailableSeats("The Movie", "");
+
+	ASSERT_EQ(seats.size(), 0);
+}
+
+TEST(MovieBooking, whenTheaterHasNoAvailableSeatsReturnEmpy)
+{
+	Service service = makeServiceWithMovies({
+		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
+		});
+
+	std::vector<std::string> seats = service.getAvailableSeats("The Movie", "The Theater");
+
+	ASSERT_EQ(seats.size(), 0);
+}
+
+TEST(MovieBooking, whenTheaterHasAllSeatsAvailableReturnAllSeats)
+{
+	Service service = makeServiceWithMovies({
+		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
+		});
+
+	std::vector<std::string> seats = service.getAvailableSeats("The Movie", "The Theater");
 
 	ASSERT_EQ(seats.size(), 0);
 }
