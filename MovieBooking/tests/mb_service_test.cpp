@@ -33,6 +33,11 @@ namespace {
 
 		return store;
 	}
+
+	inline Service makeServiceWithMovies(const std::map<std::string, std::vector<std::string>>& theatersByMovie)
+	{
+		return Service(makeStore(theatersByMovie));
+	}
 }
 
 
@@ -40,12 +45,10 @@ namespace {
 // ************************ TESTS: MOVIES ************************
 
 
-TEST(MovieBooking, canGetEmptyListOfMovies)
+TEST(MovieBooking, willGetEmptyListOfMoviesForNoMovies)
 {
-	auto store = makeStore({ });
+	Service service = makeServiceWithMovies({});
 
-
-	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 0);
@@ -53,11 +56,10 @@ TEST(MovieBooking, canGetEmptyListOfMovies)
 
 TEST(MovieBooking, wontGetAMovieIfNotInTheater)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("The Movie", makeNoTheaters()),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 0);
@@ -65,11 +67,10 @@ TEST(MovieBooking, wontGetAMovieIfNotInTheater)
 
 TEST(MovieBooking, wontGetAMovieIfNotTheaterIsEmpty)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("The Movie", makeTheatersOfOne("")),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 0);
@@ -77,11 +78,10 @@ TEST(MovieBooking, wontGetAMovieIfNotTheaterIsEmpty)
 
 TEST(MovieBooking, canGetOneMovieInTheater)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 1);
@@ -90,12 +90,11 @@ TEST(MovieBooking, canGetOneMovieInTheater)
 
 TEST(MovieBooking, canGetTwoMoviesInTheSameTheater)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("Movie A", makeTheatersOfOne("The Theater")),
 		makeMovie("Movie B", makeTheatersOfOne("The Theater")),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 2);
@@ -105,12 +104,11 @@ TEST(MovieBooking, canGetTwoMoviesInTheSameTheater)
 
 TEST(MovieBooking, canGetTwoMoviesInDifferentTheaters)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("Movie A", makeTheatersOfOne("Theater A")),
 		makeMovie("Movie B", makeTheatersOfOne("Theater B")),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 2);
@@ -120,11 +118,10 @@ TEST(MovieBooking, canGetTwoMoviesInDifferentTheaters)
 
 TEST(MovieBooking, canGetAMovieInMoreThanOneTheaters)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("The Movie", makeTheaters({"Theater A", "Theater B" })),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 1);
@@ -135,11 +132,10 @@ TEST(MovieBooking, canGetAMovieInMoreThanOneTheaters)
 
 TEST(MovieBooking, willFindNoTheaterForNoMovie)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("A movie", makeTheatersOfOne("A Theater")),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("");
 
 	ASSERT_EQ(theaters.size(), 0);
@@ -147,11 +143,10 @@ TEST(MovieBooking, willFindNoTheaterForNoMovie)
 
 TEST(MovieBooking, whenThereaAreNoTheatersWillFindNoTheater)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("My movie", makeNoTheaters()),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
 
 	ASSERT_EQ(theaters.size(), 0);
@@ -159,11 +154,10 @@ TEST(MovieBooking, whenThereaAreNoTheatersWillFindNoTheater)
 
 TEST(MovieBooking, whenTheaterNameIsEmptyWillFindNoTheater)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("My movie", makeTheatersOfOne("")),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
 
 	ASSERT_EQ(theaters.size(), 0);
@@ -171,11 +165,10 @@ TEST(MovieBooking, whenTheaterNameIsEmptyWillFindNoTheater)
 
 TEST(MovieBooking, whenOneTheaterPlaysMovieReturnOneTheater)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("The Movie");
 
 	ASSERT_EQ(theaters.size(), 1);
@@ -184,11 +177,10 @@ TEST(MovieBooking, whenOneTheaterPlaysMovieReturnOneTheater)
 
 TEST(MovieBooking, whenTwoTheatersPlayMovieReturnTheaters)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("The Movie", makeTheaters({ "Theater A", "Theater B",})),
 		});
 
-	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("The Movie");
 
 	ASSERT_EQ(theaters.size(), 2);
@@ -198,12 +190,10 @@ TEST(MovieBooking, whenTwoTheatersPlayMovieReturnTheaters)
 
 TEST(MovieBooking, whenTwoTheatersPlayDifferentMoviesReturnExpectedTheaters)
 {
-	auto store = makeStore({
+	Service service = makeServiceWithMovies({
 		makeMovie("Movie A", makeTheatersOfOne("Theater A")),
 		makeMovie("Movie B", makeTheatersOfOne("Theater B")),
 		});
-
-	Service service(std::move(store));
 
 	std::vector<std::string> theaters = service.getTheatersForMovie("Movie A");
 	EXPECT_EQ(theaters.size(), 1);
