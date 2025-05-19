@@ -319,45 +319,57 @@ TEST(MovieBooking, whenTheaterIsEmptyBookSeatFail)
 {
 	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { });
 
-	bool ok = service.bookOneSeat("The Movie", "The Theater", 0);
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0 });
 
-	ASSERT_FALSE(ok);
+	ASSERT_EQ(booked.size(), 0);
 }
+
 
 TEST(MovieBooking, whenTheaterHasNoAvailableSeatsFail)
 {
 	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false });
 
-	bool ok = service.bookOneSeat("The Movie", "The Theater", 0);
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0 });
 
-	ASSERT_FALSE(ok);
+	ASSERT_EQ(booked.size(), 0);
 }
 
 TEST(MovieBooking, whenTryingToBookTheUnavailableSeatFail)
 {
 	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, false });
 
-	bool ok = service.bookOneSeat("The Movie", "The Theater", 1);
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 1 });
 
-	ASSERT_FALSE(ok);
+	ASSERT_EQ(booked.size(), 0);
 }
 
 TEST(MovieBooking, whenTryingToBookTheOutOfBoundsSeatFail)
 {
 	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, false });
 
-	bool ok = service.bookOneSeat("The Movie", "The Theater", 23);
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 23 });
 
-	ASSERT_FALSE(ok);
+	ASSERT_EQ(booked.size(), 0);
 }
 
-TEST(MovieBooking, canBookAvailableSeat)
+TEST(MovieBooking, canBookAvailableSeatInTheaterOfOneSeat)
 {
 	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
 
-	bool ok = service.bookOneSeat("The Movie", "The Theater", 0);
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0 });
 
-	ASSERT_TRUE(ok);
+	ASSERT_EQ(booked.size(), 1);
+	ASSERT_EQ(booked.at(0), 0);
+}
+
+TEST(MovieBooking, canBookOneAvailableSeatInTheaterOfManySeats)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, true, false, true, false });
+
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 1 });
+
+	ASSERT_EQ(booked.size(), 1);
+	ASSERT_EQ(booked.at(0), 1);
 }
 
 TEST(MovieBooking, bookingAvailableSeatMakesItUnavailable)
@@ -370,8 +382,9 @@ TEST(MovieBooking, bookingAvailableSeatMakesItUnavailable)
 	ASSERT_EQ(seats_before.at(1), 1);
 	ASSERT_EQ(seats_before.at(2), 3);
 
-	bool ok = service.bookOneSeat("The Movie", "The Theater", 1);
-	ASSERT_TRUE(ok);
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 1 });
+	ASSERT_EQ(booked.size(), 1);
+	ASSERT_EQ(booked.at(0), 1);
 
 	std::vector<size_t> seats_after = service.getAvailableSeats("The Movie", "The Theater");
 
@@ -379,3 +392,7 @@ TEST(MovieBooking, bookingAvailableSeatMakesItUnavailable)
 	ASSERT_EQ(seats_after.at(0), 0);
 	ASSERT_EQ(seats_after.at(1), 3);
 }
+
+// multiple seats --> all succeed
+// multiple seats --> some fail (unavailable or non existant)
+// multiple seats -- not unique

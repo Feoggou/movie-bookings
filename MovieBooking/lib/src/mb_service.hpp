@@ -8,6 +8,7 @@
 #include <string_view>
 #include <memory>
 #include <map>
+#include <span>
 
 namespace movie_booking
 {
@@ -65,7 +66,10 @@ namespace movie_booking
 
         std::vector<size_t> getAvailableSeats(std::string_view movie, std::string_view theater) const;
 
-        bool bookOneSeat(std::string_view movie, std::string_view theater, size_t seat);
+        std::vector<size_t> bookSeats(std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
+
+    private:
+        bool _bookOneSeat(std::vector<bool>& all_seats, size_t seat);
 
     private:
         std::unique_ptr<Store> m_store;

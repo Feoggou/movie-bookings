@@ -59,22 +59,34 @@ namespace movie_booking {
 		return result;
 	}
 
-	bool Service::bookOneSeat(std::string_view movie, std::string_view theater, size_t seat)
+	bool Service::_bookOneSeat(std::vector<bool> &all_seats, size_t seat)
+	{
+		if (seat >= all_seats.size())
+			return false;
+
+		if (all_seats[seat] == false)
+			return false;
+
+		all_seats[seat] = false;
+
+		return true;
+	}
+
+	std::vector<size_t> Service::bookSeats(std::string_view movie, std::string_view theater, const std::vector<size_t> &seats)
 	{
 		auto& theaters = m_store->theatersByMovie[std::string(movie)];
 		auto theater_it = std::ranges::find_if(theaters, [=](const Theater& t) { return t.name == theater; });
 		if (theater_it == std::ranges::end(theaters))
-			return false;
+			return {};
 
-		if (seat >= theater_it->seats.size())
-			return false;
+		std::vector<size_t> booked;
 
-		if (theater_it->seats[seat] == false)
-			return false;
+		for (const size_t seat : seats) {
+			if (_bookOneSeat(theater_it->seats, seat))
+				booked.push_back(seat);
+		}
 
-		theater_it->seats[seat] = false;
-
-		return true;
+		return booked;
 	}
 
 } // namespace movie_booking
