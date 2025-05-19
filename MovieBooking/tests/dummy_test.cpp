@@ -2,6 +2,8 @@
 
 #include "mbooking/movie_booking.h"
 
+using namespace movie_booking;
+
 
 TEST(HelloTest, BasicAssertions)
 {
@@ -11,10 +13,10 @@ TEST(HelloTest, BasicAssertions)
 
 TEST(MovieBooking, canGetEmptyListOfMovies)
 {
-	auto backend = std::make_unique<BookingBackend>();
-	backend->movies = { };
+	auto store = std::make_unique<Store>();
+	store->movies = { };
 
-	MovieBookingService service(std::move(backend));
+	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 0);
@@ -22,10 +24,10 @@ TEST(MovieBooking, canGetEmptyListOfMovies)
 
 TEST(MovieBooking, canGetOneMovie)
 {
-	auto backend = std::make_unique<BookingBackend>();
-	backend->movies = {"The Movie"};
+	auto store = std::make_unique<Store>();
+	store->movies = {"The Movie"};
 
-	MovieBookingService service(std::move(backend));
+	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
 
 	ASSERT_EQ(movies.size(), 1);

@@ -1,19 +1,28 @@
 #include "mbooking/movie_booking.h"
 #include <iostream>
 
-MovieBookingService::MovieBookingService()
-	: m_backend(std::make_unique<BookingBackend>())
-{
+namespace movie_booking {
 
-}
+	Service::Service()
+		: m_store(std::make_unique<Store>())
+	{
 
-MovieBookingService::MovieBookingService(std::unique_ptr<BookingBackend>&& backend)
-	: m_backend(std::move(backend))
-{
+	}
 
-}
+	Service::Service(std::unique_ptr<Store>&& store)
+		: m_store(std::move(store))
+	{
 
-std::vector<std::string> MovieBookingService::getPlayingMovies() const
-{
-	return m_backend->movies;
-}
+	}
+
+	std::vector<std::string> Service::getPlayingMovies() const
+	{
+		return m_store->movies;
+	}
+
+	std::vector<std::string> Service::getTheatersForMovie(std::string_view movie) const
+	{
+		return {};
+	}
+
+} // namespace movie_booking

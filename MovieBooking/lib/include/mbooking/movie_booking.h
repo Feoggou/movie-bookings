@@ -5,37 +5,55 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 #include <memory>
 
-struct BookingBackend
+namespace movie_booking
 {
-public:
-    std::vector<std::string> movies = { "Movie A", "Movie B", "Movie C" };
-};
 
+    struct Store
+    {
+    public:
+        std::vector<std::string> movies = { "Movie A", "Movie B", "Movie C" };
+    };
 
-/**
- * @brief MovieBookingService class
- *
- * This class provides a service for booking movies.
- */
-class MovieBookingService
-{
-public:
-    MovieBookingService();
-
-    explicit MovieBookingService(std::unique_ptr<BookingBackend> &&backend);
 
     /**
-     * @brief Get a list of currently playing movies.
+     * @brief MovieBookingService class
      *
-     * This function returns a vector of strings representing the titles of
-     * movies that are currently playing.
-     *
-     * @return A vector of strings containing the titles of currently playing movies.
+     * This class provides a service for booking movies.
      */
-    std::vector<std::string> getPlayingMovies() const;
+    class Service
+    {
+    public:
+        Service();
 
-private:
-    std::unique_ptr<BookingBackend> m_backend;
-};
+        explicit Service(std::unique_ptr<Store>&& store);
+
+        /**
+         * @brief Get a list of currently playing movies.
+         *
+         * This function returns a vector of strings representing the titles of
+         * movies that are currently playing.
+         *
+         * @return A vector of strings containing the titles of currently playing movies.
+         */
+        std::vector<std::string> getPlayingMovies() const;
+
+        /**
+         * @brief Get a list of theaters for the currently playing movie
+         *
+         * @param movie The movie for which to see available theaters
+         *
+         * This function returns a vector of strings representing the titles of
+         * movies that are currently playing.
+         *
+         * @return A vector of strings containing the titles of currently playing movies.
+         */
+        std::vector<std::string> getTheatersForMovie(std::string_view movie) const;
+
+    private:
+        std::unique_ptr<Store> m_store;
+    };
+
+} // namespace movie_booking
