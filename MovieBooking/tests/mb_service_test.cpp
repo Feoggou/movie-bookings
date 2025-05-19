@@ -1,32 +1,45 @@
+#include "src/mb_service.hpp"
+
 #include <gtest/gtest.h>
 
-#include "src/mb_service.hpp"
+#include <ranges>
 
 using namespace movie_booking;
 
 namespace {
 
-	inline std::vector<std::string> makeTheaters(const std::vector<std::string>& theaters)
+
+	inline std::vector<Theater> makeTheaters(const std::vector<std::string>& theaters)
 	{
-		return theaters;
+		auto view = theaters
+			| std::views::transform([](const std::string& s) -> Theater { return Theater{ .name = s }; });
+
+		std::vector<Theater> result(view.begin(), view.end());
+
+		return result;
 	}
 
-	inline std::vector<std::string> makeNoTheaters()
+	inline std::vector<Theater> makeNoTheaters()
 	{
 		return {};
 	}
 
-	inline std::vector<std::string> makeTheatersOfOne(const std::string& theater)
+	inline std::vector<Theater> makeTheatersOfOne(const std::string& theater)
 	{
-		return { theater };
+		return { Theater{ .name = theater } };
 	}
 
-	inline std::pair<std::string, std::vector<std::string>> makeMovie(const std::string& name, const std::vector<std::string>& theaters)
+	inline Theater makeTheaterWithSeats(const std::string &theater, const std::vector<bool>& seats)
 	{
-		return std::make_pair(std::string(name), theaters);
+		return {};
 	}
 
-	inline std::unique_ptr<Store> makeStore(const std::map<std::string, std::vector<std::string>> &theatersByMovie)
+	inline std::pair<std::string, std::vector<Theater>> makeMovie(const std::string& name, const std::vector<Theater>& theaters)
+	{
+		return std::make_pair(name, theaters);
+	}
+
+	inline std::unique_ptr<Store> makeStore(const std::map<std::string, std::vector<Theater>> &theatersByMovie)
 	{
 		auto store = std::make_unique<Store>();
 		store->theatersByMovie = theatersByMovie;
@@ -34,7 +47,7 @@ namespace {
 		return store;
 	}
 
-	inline Service makeServiceWithMovies(const std::map<std::string, std::vector<std::string>>& theatersByMovie)
+	inline Service makeServiceWithMovies(const std::map<std::string, std::vector<Theater>>& theatersByMovie)
 	{
 		return Service(makeStore(theatersByMovie));
 	}
@@ -136,7 +149,7 @@ TEST(MovieBooking, willFindNoTheaterForNoMovie)
 		makeMovie("A movie", makeTheatersOfOne("A Theater")),
 		});
 
-	std::vector<std::string> theaters = service.getTheatersForMovie("");
+	std::vector<std::string> theaters = service.getTheaterNamesForMovie("");
 
 	ASSERT_EQ(theaters.size(), 0);
 }
@@ -147,7 +160,7 @@ TEST(MovieBooking, whenThereaAreNoTheatersWillFindNoTheater)
 		makeMovie("My movie", makeNoTheaters()),
 		});
 
-	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
+	std::vector<std::string> theaters = service.getTheaterNamesForMovie("My movie");
 
 	ASSERT_EQ(theaters.size(), 0);
 }
@@ -158,7 +171,7 @@ TEST(MovieBooking, whenTheaterNameIsEmptyWillFindNoTheater)
 		makeMovie("My movie", makeTheatersOfOne("")),
 		});
 
-	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
+	std::vector<std::string> theaters = service.getTheaterNamesForMovie("My movie");
 
 	ASSERT_EQ(theaters.size(), 0);
 }
@@ -169,7 +182,7 @@ TEST(MovieBooking, whenOneTheaterPlaysMovieReturnOneTheater)
 		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
 		});
 
-	std::vector<std::string> theaters = service.getTheatersForMovie("The Movie");
+	std::vector<std::string> theaters = service.getTheaterNamesForMovie("The Movie");
 
 	ASSERT_EQ(theaters.size(), 1);
 	ASSERT_EQ(theaters.at(0), "The Theater");
@@ -181,7 +194,7 @@ TEST(MovieBooking, whenTwoTheatersPlayMovieReturnTheaters)
 		makeMovie("The Movie", makeTheaters({ "Theater A", "Theater B",})),
 		});
 
-	std::vector<std::string> theaters = service.getTheatersForMovie("The Movie");
+	std::vector<std::string> theaters = service.getTheaterNamesForMovie("The Movie");
 
 	ASSERT_EQ(theaters.size(), 2);
 	ASSERT_EQ(theaters.at(0), "Theater A");
@@ -195,11 +208,11 @@ TEST(MovieBooking, whenTwoTheatersPlayDifferentMoviesReturnExpectedTheaters)
 		makeMovie("Movie B", makeTheatersOfOne("Theater B")),
 		});
 
-	std::vector<std::string> theaters = service.getTheatersForMovie("Movie A");
+	std::vector<std::string> theaters = service.getTheaterNamesForMovie("Movie A");
 	EXPECT_EQ(theaters.size(), 1);
 	EXPECT_EQ(theaters.at(0), "Theater A");
 
-	theaters = service.getTheatersForMovie("Movie B");
+	theaters = service.getTheaterNamesForMovie("Movie B");
 	EXPECT_EQ(theaters.size(), 1);
 	EXPECT_EQ(theaters.at(0), "Theater B");
 }

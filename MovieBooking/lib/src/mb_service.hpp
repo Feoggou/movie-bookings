@@ -11,14 +11,18 @@
 
 namespace movie_booking
 {
+    struct Theater
+    {
+        std::string name;
+    };
 
     struct Store
     {
     public:
-        std::map<std::string, std::vector<std::string>> theatersByMovie = {
-            {"Movie A", { "Theater 1", "Theater 2" } },
-            {"Movie B", { "Theater 2" } },
-            {"Movie C", { "Theater 1", "Theater 3"}},
+        std::map<std::string, std::vector<Theater>> theatersByMovie = {
+            {"Movie A", { Theater{.name = "Theater 1"}, Theater{.name = "Theater 2"} } },
+            {"Movie B", { Theater{.name="Theater 2"} } },
+            {"Movie C", { Theater{.name="Theater 1"}, Theater{.name="Theater 3"}}},
             {"Movie D", { } },
         };
     };
@@ -56,7 +60,7 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        std::vector<std::string> getTheatersForMovie(std::string_view movie) const;
+        std::vector<std::string> getTheaterNamesForMovie(std::string_view movie) const;
 
         std::vector<std::string> getAvailableSeats(std::string_view movie, std::string_view theater) const;
 

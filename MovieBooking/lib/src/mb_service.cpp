@@ -22,16 +22,10 @@ namespace movie_booking {
 
 	std::vector<std::string> Service::getPlayingMovies() const
 	{	
-		std::vector<std::string> vs;
-
-		std::ranges::any_of(vs, [](const std::string& s) {
-			return !s.empty();
-			});
-
 		auto view = m_store->theatersByMovie
 			| std::views::filter([](const auto& pair) {
 					return !pair.second.empty()
-							&& std::ranges::any_of(pair.second, [](const std::string& s) { return !s.empty(); });
+							&& std::ranges::any_of(pair.second, [](const Theater& t) { return !t.name.empty(); });
 				})
 			| std::views::transform([](const auto& pair) -> const auto& { return pair.first; });
 
@@ -39,10 +33,11 @@ namespace movie_booking {
 		return result;
 	}
 
-	std::vector<std::string> Service::getTheatersForMovie(std::string_view movie) const
+	std::vector<std::string> Service::getTheaterNamesForMovie(std::string_view movie) const
 	{
 		auto view = m_store->theatersByMovie[std::string(movie)]
-			| std::views::filter([](const std::string& s) { return !s.empty(); });
+			| std::views::transform([](const Theater& t) { return t.name; })
+			| std::views::filter([](const std::string& theaterName) { return !theaterName.empty(); });
 
 		std::vector<std::string> result(view.begin(), view.end());
 		return result;
