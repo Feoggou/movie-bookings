@@ -9,6 +9,7 @@
 #include <memory>
 #include <map>
 #include <span>
+#include <shared_mutex>
 
 namespace movie_booking
 {
@@ -40,6 +41,7 @@ namespace movie_booking
     {
     public:
         Service();
+        virtual ~Service() = default;
 
         explicit Service(std::unique_ptr<Store>&& store);
 
@@ -65,15 +67,25 @@ namespace movie_booking
          */
         std::vector<std::string> getTheaterNamesForMovie(std::string_view movie) const;
 
-        std::vector<size_t> getAvailableSeats(std::string_view movie, std::string_view theater) const;
+        virtual std::vector<size_t> getAvailableSeats(std::string_view movie, std::string_view theater) const;
 
-        std::vector<size_t> bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
+        virtual std::vector<size_t> bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
 
     private:
         bool _bookOneSeat(std::string_view client, std::vector<std::string>& all_seats, size_t seat);
 
     private:
         std::unique_ptr<Store> m_store;
+    };
+
+    class SyncedService : public Service
+    {
+    public:
+        std::vector<size_t> getAvailableSeats(std::string_view movie, std::string_view theater) const override;
+        std::vector<size_t> bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats) override;
+
+    private:
+        mutable std::shared_mutex m_rw_mutex;
     };
 
 } // namespace movie_booking

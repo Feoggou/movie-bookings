@@ -9,7 +9,6 @@
 #include <algorithm>
 
 namespace movie_booking {
-
 	Service::Service()
 		: m_store(std::make_unique<Store>())
 	{
@@ -87,6 +86,20 @@ namespace movie_booking {
 		}
 
 		return booked;
+	}
+
+	std::vector<size_t> SyncedService::getAvailableSeats(std::string_view movie, std::string_view theater) const
+	{
+		std::shared_lock lock(m_rw_mutex);
+
+		return Service::getAvailableSeats(movie, theater);
+	}
+
+	std::vector<size_t> SyncedService::bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats)
+	{
+		std::unique_lock lock(m_rw_mutex);
+
+		return Service::bookSeats(client, movie, theater, seats);
 	}
 
 } // namespace movie_booking
