@@ -1,5 +1,7 @@
 #include "mb_service.hpp"
 
+#include "utils.hpp"
+
 #include <iostream>
 #include <ranges>
 #include <string>
@@ -29,8 +31,7 @@ namespace movie_booking {
 				})
 			| std::views::transform([](const auto& pair) -> const auto& { return pair.first; });
 
-		std::vector<std::string> result(view.begin(), view.end());
-		return result;
+		return { view.begin(), view.end() };
 	}
 
 	std::vector<std::string> Service::getTheaterNamesForMovie(std::string_view movie) const
@@ -39,13 +40,23 @@ namespace movie_booking {
 			| std::views::transform([](const Theater& t) { return t.name; })
 			| std::views::filter([](const std::string& theaterName) { return !theaterName.empty(); });
 
-		std::vector<std::string> result(view.begin(), view.end());
-		return result;
+		return { view.begin(), view.end() };
 	}
 
-	std::vector<std::string> Service::getAvailableSeats(std::string_view movie, std::string_view theater) const
+	std::vector<size_t> Service::getAvailableSeats(std::string_view movie, std::string_view theater) const
 	{
-		return {};
+		const auto &theaters = m_store->theatersByMovie[std::string(movie)];
+		auto found_theater = utils::find_if_optional(theaters, [=](const Theater& t) { return t.name == theater; });
+		if (!found_theater)
+			return {};
+
+		auto indices = std::views::iota(0u, found_theater->seats.size())
+			| std::views::filter([&](std::size_t i) { return found_theater->seats[i] == true; });
+
+		std::vector<std::size_t> result;
+		std::ranges::copy(indices, std::back_inserter(result));
+
+		return result;
 	}
 
 } // namespace movie_booking

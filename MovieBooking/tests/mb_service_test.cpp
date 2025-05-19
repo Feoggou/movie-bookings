@@ -31,7 +31,7 @@ namespace {
 
 	inline Theater makeTheaterWithSeats(const std::string &theater, const std::vector<bool>& seats)
 	{
-		return {};
+		return { Theater{.name = theater, .seats = seats } };
 	}
 
 	inline std::pair<std::string, std::vector<Theater>> makeMovie(const std::string& name, const std::vector<Theater>& theaters)
@@ -52,7 +52,7 @@ namespace {
 		return Service(makeStore(theatersByMovie));
 	}
 
-	inline Service makeMovieTheaterWithSeats(const std::string &movie, const std::string &theater, const std::vector<bool> &seats)
+	inline Service makeServiceForTheaterWithSeats(const std::string &movie, const std::string &theater, const std::vector<bool> &seats)
 	{
 		return Service(makeStore({
 			makeMovie(movie, { makeTheaterWithSeats(theater, seats), })
@@ -226,46 +226,48 @@ TEST(MovieBooking, whenTwoTheatersPlayDifferentMoviesReturnExpectedTheaters)
 
 // ************************ TESTS: CHECK SEATS ************************
 
-TEST(MovieBooking, whenMovieIsEmptyReturnNoAvailableSeats)
+TEST(MovieBooking, whenMovieGivenIsEmptyReturnNoAvailableSeats)
 {
-	Service service = makeServiceWithMovies({
-		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
-		});
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
 
-	std::vector<std::string> seats = service.getAvailableSeats("", "The Theater");
+	std::vector<size_t> seats = service.getAvailableSeats("", "The Theater");
 	
 	ASSERT_EQ(seats.size(), 0);
 }
 
-TEST(MovieBooking, whenTheaterIsEmptyReturnNoAvailableSeats)
+TEST(MovieBooking, whenTheaterGivenIsEmptyThenReturnNoAvailableSeats)
 {
-	Service service = makeServiceWithMovies({
-		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
-		});
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
 
-	std::vector<std::string> seats = service.getAvailableSeats("The Movie", "");
+	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "");
 
 	ASSERT_EQ(seats.size(), 0);
 }
 
-TEST(MovieBooking, whenTheaterHasNoAvailableSeatsReturnEmpy)
+TEST(MovieBooking, whenTheaterHasEmptyListOfSeatsReturnNoAvailableSeats)
 {
-	Service service = makeServiceWithMovies({
-		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
-		});
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", {});
 
-	std::vector<std::string> seats = service.getAvailableSeats("The Movie", "The Theater");
+	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "The Theater");
 
 	ASSERT_EQ(seats.size(), 0);
 }
 
-TEST(MovieBooking, whenTheaterHasAllSeatsAvailableReturnAllSeats)
+TEST(MovieBooking, whenTheaterHasOneSeatAndNotAvailableReturnNoAvailableSeats)
 {
-	Service service = makeServiceWithMovies({
-		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
-		});
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false });
 
-	std::vector<std::string> seats = service.getAvailableSeats("The Movie", "The Theater");
+	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "The Theater");
 
 	ASSERT_EQ(seats.size(), 0);
+}
+
+TEST(MovieBooking, whenTheaterHasOneSeatAndAvailableReturnSeat)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
+
+	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "The Theater");
+
+	ASSERT_EQ(seats.size(), 1);
+	ASSERT_EQ(seats.at(0), 0);
 }

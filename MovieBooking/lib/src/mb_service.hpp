@@ -14,6 +14,7 @@ namespace movie_booking
     struct Theater
     {
         std::string name;
+        std::vector<bool> seats;
     };
 
     struct Store
@@ -62,7 +63,7 @@ namespace movie_booking
          */
         std::vector<std::string> getTheaterNamesForMovie(std::string_view movie) const;
 
-        std::vector<std::string> getAvailableSeats(std::string_view movie, std::string_view theater) const;
+        std::vector<size_t> getAvailableSeats(std::string_view movie, std::string_view theater) const;
 
     private:
         std::unique_ptr<Store> m_store;
