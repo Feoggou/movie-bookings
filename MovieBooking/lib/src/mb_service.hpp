@@ -15,8 +15,6 @@ namespace movie_booking
     struct Store
     {
     public:
-        std::vector<std::string> movies = { "Movie A", "Movie B", "Movie C" };
-        std::vector<std::string> theaters = { "Theater 1", "Theater 2" };
         std::map<std::string, std::vector<std::string>> theatersByMovie = {
             {"Movie A", { "Theater 1", "Theater 2" } },
             {"Movie B", { "Theater 2" } },
