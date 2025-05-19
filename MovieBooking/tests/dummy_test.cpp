@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "mbooking/movie_booking.h"
+#include "src/mb_service.hpp"
 
 using namespace movie_booking;
 
