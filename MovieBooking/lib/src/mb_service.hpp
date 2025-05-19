@@ -21,10 +21,11 @@ namespace movie_booking
     struct Store
     {
     public:
+        // TODO: the store should use a separate std::vector<Theater>, and only create this map when needed
         std::map<std::string, std::vector<Theater>> theatersByMovie = {
-            {"Movie A", { Theater{.name = "Theater 1"}, Theater{.name = "Theater 2"} } },
-            {"Movie B", { Theater{.name="Theater 2"} } },
-            {"Movie C", { Theater{.name="Theater 1"}, Theater{.name="Theater 3"}}},
+            {"Movie A", { Theater{.name = "Theater 1"}, Theater{.name = "Theater 2", .seats = {"", "joe", "joe", "" }}}},
+            {"Movie B", { Theater{.name="Theater 2", .seats = {"john", "", "joe", "" }} } },
+            {"Movie C", { Theater{.name="Theater 1", .seats = {"", "joe", "joe", "" }}, Theater{.name="Theater 3", .seats = {"", "", "joe", "joe", "" }}}},
             {"Movie D", { } },
         };
     };
