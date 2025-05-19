@@ -58,6 +58,8 @@ namespace movie_booking
          */
         std::vector<std::string> getTheatersForMovie(std::string_view movie) const;
 
+        std::vector<std::string> getAvailableSeats(std::string_view movie, std::string_view theater) const;
+
     private:
         std::unique_ptr<Store> m_store;
     };

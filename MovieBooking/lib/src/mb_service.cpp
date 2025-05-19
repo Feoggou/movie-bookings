@@ -48,4 +48,9 @@ namespace movie_booking {
 		return result;
 	}
 
+	std::vector<std::string> Service::getAvailableSeats(std::string_view movie, std::string_view theater) const
+	{
+		return {};
+	}
+
 } // namespace movie_booking

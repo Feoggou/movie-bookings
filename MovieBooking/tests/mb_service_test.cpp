@@ -203,3 +203,27 @@ TEST(MovieBooking, whenTwoTheatersPlayDifferentMoviesReturnExpectedTheaters)
 	EXPECT_EQ(theaters.size(), 1);
 	EXPECT_EQ(theaters.at(0), "Theater B");
 }
+
+// ************************ TESTS: CHECK SEATS ************************
+
+TEST(MovieBooking, whenMovieIsEmptyReturnNoAvailableSeats)
+{
+	Service service = makeServiceWithMovies({
+		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
+		});
+
+	std::vector<std::string> seats = service.getAvailableSeats("", "The Theater");
+	
+	ASSERT_EQ(seats.size(), 0);
+}
+
+TEST(MovieBooking, whenTheaterIsEmptyReturnNoAvailableSeats)
+{
+	Service service = makeServiceWithMovies({
+		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
+		});
+
+	std::vector<std::string> seats = service.getAvailableSeats("The Movie", "");
+
+	ASSERT_EQ(seats.size(), 0);
+}
