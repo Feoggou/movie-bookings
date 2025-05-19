@@ -1,18 +1,18 @@
 
 enable_testing()
 
-add_executable(dummy_test dummy_test.cpp)
+add_executable(moviebooking_test mb_service_test.cpp)
 
-target_include_directories(dummy_test PUBLIC "${CMAKE_SOURCE_DIR}/lib")
+target_include_directories(moviebooking_test PUBLIC "${CMAKE_SOURCE_DIR}/lib")
 
 target_link_libraries(
-  dummy_test
+  moviebooking_test
   PRIVATE
   MovieBookingLib
   GTest::gtest_main
 )
 
 include(GoogleTest)
-gtest_discover_tests(dummy_test)
+gtest_discover_tests(moviebooking_test)
 
 
