@@ -1,6 +1,7 @@
 #include "src/mb_service.hpp"
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include <ranges>
 
@@ -393,6 +394,40 @@ TEST(MovieBooking, bookingAvailableSeatMakesItUnavailable)
 	ASSERT_EQ(seats_after.at(1), 3);
 }
 
-// multiple seats --> all succeed
-// multiple seats --> some fail (unavailable or non existant)
-// multiple seats -- not unique
+TEST(MovieBooking, bookingTwoSeatsAllSucceed)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true, false, true, false });
+
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 1, 3 });
+	
+	ASSERT_EQ(booked.size(), 2);
+	ASSERT_EQ(booked.at(0), 1);
+	ASSERT_EQ(booked.at(1), 3);
+}
+
+TEST(MovieBooking, bookingTwoSeatsAllFail)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true, false, true, false });
+
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0, 2 });
+
+	ASSERT_EQ(booked.size(), 0);
+}
+
+TEST(MovieBooking, bookingManySeatsSomeFail)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true, false, true, false });
+
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0, 1, 3, 15 });
+
+	EXPECT_THAT(booked, ::testing::ElementsAreArray({ 1, 3 }));
+}
+
+TEST(MovieBooking, bookingDuplicateSeats)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true, false, true, false });
+
+	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0, 1, 3, 1, 1 });
+
+	EXPECT_THAT(booked, ::testing::ElementsAreArray({ 1, 3 }));
+}

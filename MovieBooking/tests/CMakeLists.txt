@@ -9,7 +9,7 @@ target_link_libraries(
   moviebooking_test
   PRIVATE
   MovieBookingLib
-  GTest::gtest_main
+  GTest::gmock_main
 )
 
 include(GoogleTest)
