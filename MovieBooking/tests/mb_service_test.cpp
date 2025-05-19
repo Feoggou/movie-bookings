@@ -30,7 +30,7 @@ namespace {
 		return { Theater{ .name = theater } };
 	}
 
-	inline Theater makeTheaterWithSeats(const std::string &theater, const std::vector<bool>& seats)
+	inline Theater makeTheaterWithSeats(const std::string &theater, const std::vector<std::string>& seats)
 	{
 		return { Theater{.name = theater, .seats = seats } };
 	}
@@ -53,7 +53,7 @@ namespace {
 		return Service(makeStore(theatersByMovie));
 	}
 
-	inline Service makeServiceForTheaterWithSeats(const std::string &movie, const std::string &theater, const std::vector<bool> &seats)
+	inline Service makeServiceForTheaterWithSeats(const std::string &movie, const std::string &theater, const std::vector<std::string> &seats)
 	{
 		return Service(makeStore({
 			makeMovie(movie, { makeTheaterWithSeats(theater, seats), })
@@ -229,7 +229,7 @@ TEST(MovieBooking, whenTwoTheatersPlayDifferentMoviesReturnExpectedTheaters)
 
 TEST(MovieBooking, whenMovieGivenIsEmptyReturnNoAvailableSeats)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "" });
 
 	std::vector<size_t> seats = service.getAvailableSeats("", "The Theater");
 	
@@ -238,7 +238,7 @@ TEST(MovieBooking, whenMovieGivenIsEmptyReturnNoAvailableSeats)
 
 TEST(MovieBooking, whenTheaterGivenIsEmptyThenReturnNoAvailableSeats)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "" });
 
 	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "");
 
@@ -256,7 +256,7 @@ TEST(MovieBooking, whenTheaterHasEmptyListOfSeatsReturnNoAvailableSeats)
 
 TEST(MovieBooking, whenTheaterHasOneSeatAndNotAvailableReturnNoAvailableSeats)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "john" });
 
 	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "The Theater");
 
@@ -265,7 +265,7 @@ TEST(MovieBooking, whenTheaterHasOneSeatAndNotAvailableReturnNoAvailableSeats)
 
 TEST(MovieBooking, whenMovieIsNotInTheatersReturnNoAvailableSeats)
 {
-	Service service = makeServiceForTheaterWithSeats("Movie A", "The Theater", { true });
+	Service service = makeServiceForTheaterWithSeats("Movie A", "The Theater", { "" });
 
 	std::vector<size_t> seats = service.getAvailableSeats("Movie B", "The Theater");
 
@@ -274,7 +274,7 @@ TEST(MovieBooking, whenMovieIsNotInTheatersReturnNoAvailableSeats)
 
 TEST(MovieBooking, whenTheaterDoesntExistReturnNoAvailableSeats)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "Theater A", { true });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "Theater A", { "" });
 
 	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "Theater B");
 
@@ -283,7 +283,7 @@ TEST(MovieBooking, whenTheaterDoesntExistReturnNoAvailableSeats)
 
 TEST(MovieBooking, whenTheaterHasOneSeatAndAvailableReturnSeat)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "" });
 
 	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "The Theater");
 
@@ -293,7 +293,7 @@ TEST(MovieBooking, whenTheaterHasOneSeatAndAvailableReturnSeat)
 
 TEST(MovieBooking, whenTheaterHasTwoSeatsAndOneAvailableReturnAvailableSeat)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "john", ""});
 
 	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "The Theater");
 
@@ -303,7 +303,7 @@ TEST(MovieBooking, whenTheaterHasTwoSeatsAndOneAvailableReturnAvailableSeat)
 
 TEST(MovieBooking, whenTheaterHasMultipleSeatsAvailableReturnSeats)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, false, true, false, true, true });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "", "joe", "", "mark", "", ""});
 
 	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "The Theater");
 
@@ -320,44 +320,43 @@ TEST(MovieBooking, whenTheaterIsEmptyBookSeatFail)
 {
 	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { });
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 0 });
 
 	ASSERT_EQ(booked.size(), 0);
 }
 
-
 TEST(MovieBooking, whenTheaterHasNoAvailableSeatsFail)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "joe" });
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 0 });
 
 	ASSERT_EQ(booked.size(), 0);
 }
 
 TEST(MovieBooking, whenTryingToBookTheUnavailableSeatFail)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "", "john" });
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 1 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 1 });
 
 	ASSERT_EQ(booked.size(), 0);
 }
 
 TEST(MovieBooking, whenTryingToBookTheOutOfBoundsSeatFail)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "", "joe" });
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 23 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 23 });
 
 	ASSERT_EQ(booked.size(), 0);
 }
 
 TEST(MovieBooking, canBookAvailableSeatInTheaterOfOneSeat)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "" });
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 0 });
 
 	ASSERT_EQ(booked.size(), 1);
 	ASSERT_EQ(booked.at(0), 0);
@@ -365,9 +364,9 @@ TEST(MovieBooking, canBookAvailableSeatInTheaterOfOneSeat)
 
 TEST(MovieBooking, canBookOneAvailableSeatInTheaterOfManySeats)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, true, false, true, false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "", "", "joe" , "", "mark"});
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 1 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 1 });
 
 	ASSERT_EQ(booked.size(), 1);
 	ASSERT_EQ(booked.at(0), 1);
@@ -375,7 +374,7 @@ TEST(MovieBooking, canBookOneAvailableSeatInTheaterOfManySeats)
 
 TEST(MovieBooking, bookingAvailableSeatMakesItUnavailable)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, true, false, true, false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "", "", "joe", "", "mark"});
 
 	std::vector<size_t> seats_before = service.getAvailableSeats("The Movie", "The Theater");
 	ASSERT_EQ(seats_before.size(), 3);
@@ -383,7 +382,7 @@ TEST(MovieBooking, bookingAvailableSeatMakesItUnavailable)
 	ASSERT_EQ(seats_before.at(1), 1);
 	ASSERT_EQ(seats_before.at(2), 3);
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 1 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 1 });
 	ASSERT_EQ(booked.size(), 1);
 	ASSERT_EQ(booked.at(0), 1);
 
@@ -396,9 +395,9 @@ TEST(MovieBooking, bookingAvailableSeatMakesItUnavailable)
 
 TEST(MovieBooking, bookingTwoSeatsAllSucceed)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true, false, true, false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "joe", "", "joe", "", "joe"});
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 1, 3 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 1, 3 });
 	
 	ASSERT_EQ(booked.size(), 2);
 	ASSERT_EQ(booked.at(0), 1);
@@ -407,27 +406,27 @@ TEST(MovieBooking, bookingTwoSeatsAllSucceed)
 
 TEST(MovieBooking, bookingTwoSeatsAllFail)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true, false, true, false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "joe", "", "mark", "", "joe"});
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0, 2 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 0, 2 });
 
 	ASSERT_EQ(booked.size(), 0);
 }
 
 TEST(MovieBooking, bookingManySeatsSomeFail)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true, false, true, false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "joe", "", "joe", "", "joe"});
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0, 1, 3, 15 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 0, 1, 3, 15 });
 
 	EXPECT_THAT(booked, ::testing::ElementsAreArray({ 1, 3 }));
 }
 
 TEST(MovieBooking, bookingDuplicateSeats)
 {
-	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false, true, false, true, false });
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { "joe", "", "joe", "", "joe"});
 
-	std::vector<size_t> booked = service.bookSeats("The Movie", "The Theater", { 0, 1, 3, 1, 1 });
+	std::vector<size_t> booked = service.bookSeats("john", "The Movie", "The Theater", { 0, 1, 3, 1, 1 });
 
 	EXPECT_THAT(booked, ::testing::ElementsAreArray({ 1, 3 }));
 }

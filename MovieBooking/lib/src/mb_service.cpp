@@ -51,7 +51,7 @@ namespace movie_booking {
 			return {};
 
 		auto indices = std::views::iota(0u, found_theater->seats.size())
-			| std::views::filter([&](std::size_t i) { return found_theater->seats[i] == true; });
+			| std::views::filter([&](std::size_t i) { return found_theater->seats[i].empty(); });
 
 		std::vector<std::size_t> result;
 		std::ranges::copy(indices, std::back_inserter(result));
@@ -59,20 +59,20 @@ namespace movie_booking {
 		return result;
 	}
 
-	bool Service::_bookOneSeat(std::vector<bool> &all_seats, size_t seat)
+	bool Service::_bookOneSeat(std::string_view client, std::vector<std::string> &all_seats, size_t seat)
 	{
 		if (seat >= all_seats.size())
 			return false;
 
-		if (all_seats[seat] == false)
+		if (!all_seats[seat].empty())
 			return false;
 
-		all_seats[seat] = false;
+		all_seats[seat] = client;
 
 		return true;
 	}
 
-	std::vector<size_t> Service::bookSeats(std::string_view movie, std::string_view theater, const std::vector<size_t> &seats)
+	std::vector<size_t> Service::bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t> &seats)
 	{
 		auto& theaters = m_store->theatersByMovie[std::string(movie)];
 		auto theater_it = std::ranges::find_if(theaters, [=](const Theater& t) { return t.name == theater; });
@@ -82,7 +82,7 @@ namespace movie_booking {
 		std::vector<size_t> booked;
 
 		for (const size_t seat : seats) {
-			if (_bookOneSeat(theater_it->seats, seat))
+			if (_bookOneSeat(client, theater_it->seats, seat))
 				booked.push_back(seat);
 		}
 
