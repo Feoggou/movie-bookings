@@ -59,4 +59,22 @@ namespace movie_booking {
 		return result;
 	}
 
+	bool Service::bookOneSeat(std::string_view movie, std::string_view theater, size_t seat)
+	{
+		auto& theaters = m_store->theatersByMovie[std::string(movie)];
+		auto theater_it = std::ranges::find_if(theaters, [=](const Theater& t) { return t.name == theater; });
+		if (theater_it == std::ranges::end(theaters))
+			return false;
+
+		if (seat >= theater_it->seats.size())
+			return false;
+
+		if (theater_it->seats[seat] == false)
+			return false;
+
+		theater_it->seats[seat] = false;
+
+		return true;
+	}
+
 } // namespace movie_booking

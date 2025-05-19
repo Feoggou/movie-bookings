@@ -312,3 +312,70 @@ TEST(MovieBooking, whenTheaterHasMultipleSeatsAvailableReturnSeats)
 	ASSERT_EQ(seats.at(2), 4);
 	ASSERT_EQ(seats.at(3), 5);
 }
+
+// ************************ TESTS: BOOK SEATS ************************
+
+TEST(MovieBooking, whenTheaterIsEmptyBookSeatFail)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { });
+
+	bool ok = service.bookOneSeat("The Movie", "The Theater", 0);
+
+	ASSERT_FALSE(ok);
+}
+
+TEST(MovieBooking, whenTheaterHasNoAvailableSeatsFail)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { false });
+
+	bool ok = service.bookOneSeat("The Movie", "The Theater", 0);
+
+	ASSERT_FALSE(ok);
+}
+
+TEST(MovieBooking, whenTryingToBookTheUnavailableSeatFail)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, false });
+
+	bool ok = service.bookOneSeat("The Movie", "The Theater", 1);
+
+	ASSERT_FALSE(ok);
+}
+
+TEST(MovieBooking, whenTryingToBookTheOutOfBoundsSeatFail)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, false });
+
+	bool ok = service.bookOneSeat("The Movie", "The Theater", 23);
+
+	ASSERT_FALSE(ok);
+}
+
+TEST(MovieBooking, canBookAvailableSeat)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
+
+	bool ok = service.bookOneSeat("The Movie", "The Theater", 0);
+
+	ASSERT_TRUE(ok);
+}
+
+TEST(MovieBooking, bookingAvailableSeatMakesItUnavailable)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true, true, false, true, false });
+
+	std::vector<size_t> seats_before = service.getAvailableSeats("The Movie", "The Theater");
+	ASSERT_EQ(seats_before.size(), 3);
+	ASSERT_EQ(seats_before.at(0), 0);
+	ASSERT_EQ(seats_before.at(1), 1);
+	ASSERT_EQ(seats_before.at(2), 3);
+
+	bool ok = service.bookOneSeat("The Movie", "The Theater", 1);
+	ASSERT_TRUE(ok);
+
+	std::vector<size_t> seats_after = service.getAvailableSeats("The Movie", "The Theater");
+
+	ASSERT_EQ(seats_after.size(), 2);
+	ASSERT_EQ(seats_after.at(0), 0);
+	ASSERT_EQ(seats_after.at(1), 3);
+}
