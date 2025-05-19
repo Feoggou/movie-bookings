@@ -20,7 +20,7 @@ Conan profile:
 arch=x86_64
 build_type=Debug
 compiler=msvc
-compiler.cppstd=17
+compiler.cppstd=20
 compiler.runtime=dynamic
 compiler.version=194
 os=Windows
