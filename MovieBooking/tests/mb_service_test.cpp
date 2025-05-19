@@ -46,3 +46,54 @@ TEST(MovieBooking, canGetTwoMovies)
 	ASSERT_EQ(movies.at(0), "Movie A");
 	ASSERT_EQ(movies.at(1), "Movie B");
 }
+
+TEST(MovieBooking, willFindNoTheaterForNoMovie)
+{
+	auto store = std::make_unique<Store>();
+	store->movies = { };
+	store->theaters = {};
+
+	Service service(std::move(store));
+	std::vector<std::string> theaters = service.getTheatersForMovie("");
+
+	ASSERT_EQ(theaters.size(), 0);
+}
+
+TEST(MovieBooking, whenThereaAreNoTheatersWillFindNoTheater)
+{
+	auto store = std::make_unique<Store>();
+	store->movies = { };
+	store->theaters = {};
+
+	Service service(std::move(store));
+	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
+
+	ASSERT_EQ(theaters.size(), 0);
+}
+
+TEST(MovieBooking, whenMovieIsNotPlayedInTheatersWillFindNoTheater)
+{
+	auto store = std::make_unique<Store>();
+	store->movies = { };
+	store->theaters = { "Theater 1", "Theater 2" };
+
+	Service service(std::move(store));
+	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
+
+	ASSERT_EQ(theaters.size(), 0);
+}
+
+TEST(MovieBooking, whenOneTheaterPlaysMovieReturnOneTheater)
+{
+	auto store = std::make_unique<Store>();
+	store->movies = { "My movie" };
+	store->theaters = { "Theater 1", "Theater 2" };
+	store->theatersByMovie = {
+		{"My movie", {"Theater 1", "Theater 2"}}
+	};
+
+	Service service(std::move(store));
+	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
+
+	ASSERT_EQ(theaters.size(), 0);
+}

@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <memory>
+#include <map>
 
 namespace movie_booking
 {
@@ -15,6 +16,13 @@ namespace movie_booking
     {
     public:
         std::vector<std::string> movies = { "Movie A", "Movie B", "Movie C" };
+        std::vector<std::string> theaters = { "Theater 1", "Theater 2" };
+        std::map<std::string, std::vector<std::string>> theatersByMovie = {
+            {"Movie A", { "Theater 1", "Theater 2" } },
+            {"Movie B", { "Theater 2" } },
+            {"Movie C", { "Theater 1", "Theater 3"}},
+            {"Movie D", { } },
+        };
     };
 
 
