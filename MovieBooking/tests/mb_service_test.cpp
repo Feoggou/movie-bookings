@@ -262,6 +262,24 @@ TEST(MovieBooking, whenTheaterHasOneSeatAndNotAvailableReturnNoAvailableSeats)
 	ASSERT_EQ(seats.size(), 0);
 }
 
+TEST(MovieBooking, whenMovieIsNotInTheatersReturnNoAvailableSeats)
+{
+	Service service = makeServiceForTheaterWithSeats("Movie A", "The Theater", { true });
+
+	std::vector<size_t> seats = service.getAvailableSeats("Movie B", "The Theater");
+
+	ASSERT_EQ(seats.size(), 0);
+}
+
+TEST(MovieBooking, whenTheaterDoesntExistReturnNoAvailableSeats)
+{
+	Service service = makeServiceForTheaterWithSeats("The Movie", "Theater A", { true });
+
+	std::vector<size_t> seats = service.getAvailableSeats("The Movie", "Theater B");
+
+	ASSERT_EQ(seats.size(), 0);
+}
+
 TEST(MovieBooking, whenTheaterHasOneSeatAndAvailableReturnSeat)
 {
 	Service service = makeServiceForTheaterWithSeats("The Movie", "The Theater", { true });
