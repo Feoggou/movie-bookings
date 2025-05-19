@@ -4,33 +4,46 @@
 
 using namespace movie_booking;
 
-inline std::vector<std::string> makeTheaters(const std::vector<std::string>& theaters)
-{
-	return theaters;
+namespace {
+
+	inline std::vector<std::string> makeTheaters(const std::vector<std::string>& theaters)
+	{
+		return theaters;
+	}
+
+	inline std::vector<std::string> makeNoTheaters()
+	{
+		return {};
+	}
+
+	inline std::vector<std::string> makeTheatersOfOne(const std::string& theater)
+	{
+		return { theater };
+	}
+
+	inline std::pair<std::string, std::vector<std::string>> makeMovie(const std::string& name, const std::vector<std::string>& theaters)
+	{
+		return std::make_pair(std::string(name), theaters);
+	}
+
+	inline std::unique_ptr<Store> makeStore(const std::map<std::string, std::vector<std::string>> &theatersByMovie)
+	{
+		auto store = std::make_unique<Store>();
+		store->theatersByMovie = theatersByMovie;
+
+		return store;
+	}
 }
 
-inline std::vector<std::string> makeNoTheaters()
-{
-	return {};
-}
 
-inline std::vector<std::string> makeTheatersOfOne(const std::string &theater)
-{
-	return { theater };
-}
-
-inline std::pair<std::string, std::vector<std::string>> makeMovie(const std::string &name, const std::vector<std::string> &theaters)
-{
-	return std::make_pair(std::string(name), theaters);
-}
 
 // ************************ TESTS: MOVIES ************************
 
 
 TEST(MovieBooking, canGetEmptyListOfMovies)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = { };
+	auto store = makeStore({ });
+
 
 	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
@@ -40,8 +53,9 @@ TEST(MovieBooking, canGetEmptyListOfMovies)
 
 TEST(MovieBooking, wontGetAMovieIfNotInTheater)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = { makeMovie("The Movie", makeNoTheaters()), };
+	auto store = makeStore({
+		makeMovie("The Movie", makeNoTheaters()),
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
@@ -51,8 +65,9 @@ TEST(MovieBooking, wontGetAMovieIfNotInTheater)
 
 TEST(MovieBooking, wontGetAMovieIfNotTheaterIsEmpty)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = { makeMovie("The Movie", makeTheatersOfOne(""))};
+	auto store = makeStore({
+		makeMovie("The Movie", makeTheatersOfOne("")),
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
@@ -62,8 +77,9 @@ TEST(MovieBooking, wontGetAMovieIfNotTheaterIsEmpty)
 
 TEST(MovieBooking, canGetOneMovieInTheater)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {makeMovie("The Movie", makeTheatersOfOne("The Theater")),};
+	auto store = makeStore({
+		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
@@ -74,11 +90,10 @@ TEST(MovieBooking, canGetOneMovieInTheater)
 
 TEST(MovieBooking, canGetTwoMoviesInTheSameTheater)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("Movie A", makeTheatersOfOne("The Theater")),
 		makeMovie("Movie B", makeTheatersOfOne("The Theater")),
-	};
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
@@ -90,11 +105,10 @@ TEST(MovieBooking, canGetTwoMoviesInTheSameTheater)
 
 TEST(MovieBooking, canGetTwoMoviesInDifferentTheaters)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("Movie A", makeTheatersOfOne("Theater A")),
 		makeMovie("Movie B", makeTheatersOfOne("Theater B")),
-	};
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
@@ -106,10 +120,9 @@ TEST(MovieBooking, canGetTwoMoviesInDifferentTheaters)
 
 TEST(MovieBooking, canGetAMovieInMoreThanOneTheaters)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("The Movie", makeTheaters({"Theater A", "Theater B" })),
-	};
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> movies = service.getPlayingMovies();
@@ -122,10 +135,9 @@ TEST(MovieBooking, canGetAMovieInMoreThanOneTheaters)
 
 TEST(MovieBooking, willFindNoTheaterForNoMovie)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("A movie", makeTheatersOfOne("A Theater")),
-	};
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("");
@@ -135,10 +147,9 @@ TEST(MovieBooking, willFindNoTheaterForNoMovie)
 
 TEST(MovieBooking, whenThereaAreNoTheatersWillFindNoTheater)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("My movie", makeNoTheaters()),
-	};
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
@@ -148,10 +159,9 @@ TEST(MovieBooking, whenThereaAreNoTheatersWillFindNoTheater)
 
 TEST(MovieBooking, whenTheaterNameIsEmptyWillFindNoTheater)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("My movie", makeTheatersOfOne("")),
-	};
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("My movie");
@@ -161,10 +171,9 @@ TEST(MovieBooking, whenTheaterNameIsEmptyWillFindNoTheater)
 
 TEST(MovieBooking, whenOneTheaterPlaysMovieReturnOneTheater)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("The Movie", makeTheatersOfOne("The Theater")),
-	};
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("The Movie");
@@ -175,10 +184,9 @@ TEST(MovieBooking, whenOneTheaterPlaysMovieReturnOneTheater)
 
 TEST(MovieBooking, whenTwoTheatersPlayMovieReturnTheaters)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("The Movie", makeTheaters({ "Theater A", "Theater B",})),
-	};
+		});
 
 	Service service(std::move(store));
 	std::vector<std::string> theaters = service.getTheatersForMovie("The Movie");
@@ -190,11 +198,10 @@ TEST(MovieBooking, whenTwoTheatersPlayMovieReturnTheaters)
 
 TEST(MovieBooking, whenTwoTheatersPlayDifferentMoviesReturnExpectedTheaters)
 {
-	auto store = std::make_unique<Store>();
-	store->theatersByMovie = {
+	auto store = makeStore({
 		makeMovie("Movie A", makeTheatersOfOne("Theater A")),
 		makeMovie("Movie B", makeTheatersOfOne("Theater B")),
-	};
+		});
 
 	Service service(std::move(store));
 
