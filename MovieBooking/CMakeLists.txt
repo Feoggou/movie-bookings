@@ -24,6 +24,8 @@ message(STATUS "Found nlohmann_json version: ${nlohmann_json_VERSION}")
 
 find_package(Doxygen REQUIRED)
 
+enable_testing()
+
 # Include sub-projects.
 add_subdirectory ("src")
 add_subdirectory ("lib")

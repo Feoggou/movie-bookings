@@ -1,175 +1,178 @@
 {
-    "version": 3,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 28,
-        "patch": 0
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+      },
+      "environment": {
+        "VCPKG_ROOT": "${sourceDir}/external/vcpkg"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     },
-    "configurePresets": [
-        {
-            "name": "windows-base",
-            "hidden": true,
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-            "cacheVariables": {
-              "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
-              "CMAKE_CXX_STANDARD": "20",
-              "CMAKE_CXX_STANDARD_REQUIRED": "ON"
-            },
-            "environment": {
-                "VCPKG_ROOT": "${sourceDir}/external/vcpkg"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
-        },
-        {
-            "name": "linux-base",
-            "hidden": true,
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "cmakeExecutable": "/usr/bin/cmake",
-            "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
-            "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
-            },
-            "environment": {
-                "VCPKG_ROOT": "${sourceDir}/external/vcpkg"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            }
-        },
-        {
-            "name": "win-x64-debug",
-            "displayName": "x64 Debug",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "win-x64-release",
-            "displayName": "x64 Release",
-            "inherits": "win-x64-debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "win-x86-debug",
-            "displayName": "x86 Debug",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x86",
-                "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "win-x86-release",
-            "displayName": "x86 Release",
-            "inherits": "win-x86-debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "conan-win64-debug",
-            "hidden": false,
-            "binaryDir": "${sourceDir}/out/conan-build/${presetName}",
-            "installDir": "${sourceDir}/out/conan-install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/conan-cmake-modules/conan_toolchain.cmake",
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl"
-            }
-        },
-        {
-            "name": "docker-x64-debug-ubuntu",
-            "cmakeExecutable": "./docker_preset.sh",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
-            },
-            "architecture": {
-                "value": "x64",
-                "strategy": "set"
-            }
-        },
-        {
-            "name": "linux-x64-debug",
-            "displayName": "x64 Debug",
-            "inherits": "linux-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        }
-    ],
-    "buildPresets": [
-        {
-            "name": "win-x64-debug",
-            "description": "",
-            "displayName": "Win x64 Debug",
-            "configurePreset": "win-x64-debug"
-        },
-        {
-            "name": "linux-x64-debug",
-            "description": "",
-            "displayName": "Linux x64 Debug",
-            "configurePreset": "linux-x64-debug"
-        },
-        {
-            "name": "conan-win64-debug",
-            "configurePreset": "conan-win64-debug"
-        },
-        {
-            "name": "docker-x64-debug-ubuntu",
-            "description": "",
-            "displayName": "Docker build Linux x64 Debug",
-            "configurePreset": "docker-x64-debug-ubuntu"
-        },
-        {
-            "name": "win-build-doc",
-            "configurePreset": "win-x64-debug",
-            "targets": [
-                "doc"
-            ]
-        },
-        {
-            "name": "linux-build-doc",
-            "configurePreset": "linux-x64-debug",
-            "targets": [
-                "doc"
-            ]
-        }
-    ],
-    "testPresets": [
-        {
-            "name": "test-win64-debug",
-            "description": "",
-            "displayName": "",
-            "configurePreset": "win-x64-debug"
-        }
-    ]
+    {
+      "name": "linux-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+      },
+      "environment": {
+        "VCPKG_ROOT": "${sourceDir}/external/vcpkg"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "win-x64-debug",
+      "displayName": "x64 Debug",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "win-x64-release",
+      "displayName": "x64 Release",
+      "inherits": "win-x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "win-x86-debug",
+      "displayName": "x86 Debug",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "win-x86-release",
+      "displayName": "x86 Release",
+      "inherits": "win-x86-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "conan-win64-debug",
+      "hidden": false,
+      "binaryDir": "${sourceDir}/out/conan-build/${presetName}",
+      "installDir": "${sourceDir}/out/conan-install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/conan-cmake-modules/conan_toolchain.cmake",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl"
+      }
+    },
+    {
+      "name": "docker-x64-debug-ubuntu",
+      "cmakeExecutable": "./docker_preset.sh",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+      },
+      "architecture": {
+        "value": "x64",
+        "strategy": "set"
+      }
+    },
+    {
+      "name": "linux-x64-debug",
+      "displayName": "x64 Debug",
+      "inherits": "linux-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "win-x64-debug",
+      "description": "",
+      "displayName": "Win x64 Debug",
+      "configurePreset": "win-x64-debug"
+    },
+    {
+      "name": "linux-x64-debug",
+      "description": "",
+      "displayName": "Linux x64 Debug",
+      "configurePreset": "linux-x64-debug"
+    },
+    {
+      "name": "conan-win64-debug",
+      "configurePreset": "conan-win64-debug"
+    },
+    {
+      "name": "docker-x64-debug-ubuntu",
+      "description": "",
+      "displayName": "Docker build Linux x64 Debug",
+      "configurePreset": "docker-x64-debug-ubuntu"
+    },
+    {
+      "name": "win-build-doc",
+      "configurePreset": "win-x64-debug",
+      "targets": [
+        "doc"
+      ]
+    },
+    {
+      "name": "linux-build-doc",
+      "configurePreset": "linux-x64-debug",
+      "targets": [
+        "doc"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "win-x64-debug",
+      "description": "",
+      "displayName": "",
+      "configurePreset": "win-x64-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
 }
