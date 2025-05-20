@@ -49,6 +49,11 @@ git checkout 2025.04.09
 .\bootstrap-vcpkg.bat
 ```
 
+Generate documentation like this:
+```
+cmake --build -t doc --preset win-x64-debug
+```
+
 
 ==================
 
