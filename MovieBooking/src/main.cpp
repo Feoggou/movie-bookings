@@ -1,11 +1,17 @@
 ﻿// MovieBooking.cpp : Defines the entry point for the application.
 //
 
+#include "src/mb_service.hpp"
+#include "src/workers.hpp"
+#include <mbooking/movie_booking.h>
+
 #include <nlohmann/json.hpp>
 #include <zmq.hpp>
 
 #include <iostream>
-#include "src/mb_service.hpp"
+#include <chrono>
+#include <thread>
+
 
 using namespace std;
 
@@ -79,6 +85,7 @@ nlohmann::json execute_command(movie_booking::Service &s, string_view command_na
 
 int main()
 {
+#if 0
     movie_booking::Service service;
 
 	std::cout << "Hello World!" << std::endl;
@@ -120,6 +127,22 @@ int main()
         memcpy(reply.data(), reply_msg.data(), reply_msg.size());
         socket.send(reply, zmq::send_flags::none);
     }
+#else
+    start_workers();
+
+    movie_booking::SyncedService service;
+    movie_booking::API api(service);
+
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        auto movies = api.getPlayingMovies();
+        auto theaters = api.getTheaterNamesForMovie("Movie A");
+        //std::cout << "theater 2: " << theaters[1] << std::endl;
+        auto seats_avail = api.getAvailableSeats("Movie A", "Theater 2");
+        auto seats_booked = api.bookSeats("joe", "Movie A", "Theater 2", { 0 });
+        seats_avail = api.getAvailableSeats("Movie A", "Theater 2");
+    }
+#endif
 
 	return 0;
 }
