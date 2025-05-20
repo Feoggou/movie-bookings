@@ -2,6 +2,7 @@
 //
 
 #include <nlohmann/json.hpp>
+#include <zmq.h>
 
 #include <iostream>
 
@@ -35,7 +36,34 @@ int main()
 {
 	std::cout << "Hello World!" << std::endl;
 
-    json_foo();
+    zmq::context_t context(1);
 
+#if 0
+    // 1. Create ZeroMQ context with a single IO thread
+    zmq::context_t context(1);
+
+    // 2. Create REP (reply) socket
+    zmq::socket_t socket(context, zmq::socket_type::rep);
+
+    // 3. Bind to TCP port
+    socket.bind("tcp://*:5555");
+
+    std::cout << "Server listening on port 5555...\n";
+
+    while (true) {
+        zmq::message_t request;
+
+        // 4. Wait for next client request
+        socket.recv(request, zmq::recv_flags::none);
+        std::string received_msg(static_cast<char*>(request.data()), request.size());
+        std::cout << "Received: " << received_msg << std::endl;
+
+        // 5. Send reply back to client
+        std::string reply_msg = "Hello from server";
+        zmq::message_t reply(reply_msg.size());
+        memcpy(reply.data(), reply_msg.data(), reply_msg.size());
+        socket.send(reply, zmq::send_flags::none);
+    }
+#endif
 	return 0;
 }
