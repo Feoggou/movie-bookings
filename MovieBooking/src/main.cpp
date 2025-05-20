@@ -5,6 +5,7 @@
 #include <zmq.hpp>
 
 #include <iostream>
+#include "src/mb_service.hpp"
 
 using namespace std;
 
@@ -32,8 +33,54 @@ void json_foo()
     std::cout << "JSON string: " << json_str << std::endl;
 }
 
+nlohmann::json execute_command(movie_booking::Service &s, string_view command_name, nlohmann::json args)
+{
+    if (command_name == "getPlayingMovies") {
+        return s.getPlayingMovies();
+    }
+    else if (command_name == "getTheaterNamesForMovie") {
+        std::cout << "args --------- " << args << std::endl;
+        std::vector<std::string> vec = args;
+        if (vec.size() == 1) {
+            std::string movie = vec[0];
+            return s.getTheaterNamesForMovie(movie);
+        }
+    }
+    else if (command_name == "getAvailableSeats") {
+        std::cout << "args --------- " << args << std::endl;
+        std::vector<std::string> vec = args;
+        if (vec.size() == 2) {
+            std::string movie = vec[0];
+            std::string theater = vec[1];
+
+            return s.getAvailableSeats(movie, theater);
+        }
+    }
+    else if (command_name == "bookSeats") {
+        std::cout << "args --------- " << args << std::endl;
+        std::cout << "args size: " << args.size() << std::endl;
+        
+        std::string client = args[0];
+        std::string movie = args[1];
+        std::string theater = args[2];
+
+        std::cout << "client: " << client << std::endl;
+        std::cout << "movie: " << movie << std::endl;
+        std::cout << "theater: " << theater << std::endl;
+        std::vector<size_t> seats = args[3];
+
+        std::cout << "seats: " << seats.size() << " in total " << std::endl;
+
+        return s.bookSeats(client, movie, theater, seats);
+    }
+
+    return {};
+}
+
 int main()
 {
+    movie_booking::Service service;
+
 	std::cout << "Hello World!" << std::endl;
 
     // 1. Create ZeroMQ context with a single IO thread
@@ -51,12 +98,24 @@ int main()
         zmq::message_t request;
 
         // 4. Wait for next client request
-        socket.recv(request, zmq::recv_flags::none);
+        auto sock_reply = socket.recv(request, zmq::recv_flags::none);
         std::string received_msg(static_cast<char*>(request.data()), request.size());
-        std::cout << "Received: " << received_msg << std::endl;
+        std::cerr << "Received: " << received_msg << std::endl;
+
+        nlohmann::json json = nlohmann::json::parse(received_msg);
+        if (json.contains("pid")) {
+            std::cerr << "PID is " << json["pid"] << "; cmd=" << json["cmd"] << std::endl;
+            nlohmann::json args;
+
+            if (json.contains("args")) {
+                args = json["args"];
+            }
+            json = execute_command(service, json["cmd"], args);
+            std::cerr << "JSON result is: " << json << std::endl;
+        }
 
         // 5. Send reply back to client
-        std::string reply_msg = "Hello from server";
+        std::string reply_msg = json.dump();
         zmq::message_t reply(reply_msg.size());
         memcpy(reply.data(), reply_msg.data(), reply_msg.size());
         socket.send(reply, zmq::send_flags::none);
