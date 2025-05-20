@@ -7,10 +7,25 @@
 #include <vector>
 #include <string>
 
+ /**
+  * @namespace movie_booking
+  * @brief Contains utility functions for the mylib library.
+  *
+  * This namespace includes helper functions used throughout
+  * the library, such as string manipulation and math utilities.
+  */
 namespace movie_booking
 {
     class Service;
 
+    /**
+ * @class API
+ * @brief A short summary of what API does.
+ *
+ * A more detailed description of MyClass,
+ * potentially spanning multiple lines.
+ *
+ */
     class API
     {
     public:

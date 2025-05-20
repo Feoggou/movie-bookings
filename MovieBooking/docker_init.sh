@@ -28,3 +28,8 @@ pwd
 ls -alh
 
 cmake --preset=linux-x64-debug && cmake --build --preset=linux-x64-debug
+ctest --preset=linux-x64-debug
+
+find . -name MovieBooking -type f
+
+./out/build/linux-x64-debug/src/MovieBooking

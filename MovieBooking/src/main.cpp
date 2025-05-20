@@ -39,7 +39,7 @@ void json_foo()
     std::cout << "JSON string: " << json_str << std::endl;
 }
 
-nlohmann::json execute_command(movie_booking::API &api, string_view command_name, nlohmann::json args)
+nlohmann::json execute_command(movie_booking::API &api, const string &command_name, const nlohmann::json &args)
 {
     if (command_name == "getPlayingMovies") {
         return api.getPlayingMovies();

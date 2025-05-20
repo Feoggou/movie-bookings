@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <mutex>
 
 namespace movie_booking {
 	Service::Service()

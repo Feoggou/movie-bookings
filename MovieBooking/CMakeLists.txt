@@ -18,6 +18,8 @@ find_package(GTest CONFIG REQUIRED)
 message(STATUS "Found GTest version: ${GTest_VERSION}")
 find_package(ZeroMQ CONFIG REQUIRED)
 message(STATUS "Found ZeroMQ version: ${ZeroMQ_VERSION}")
+find_package(cppzmq CONFIG REQUIRED)
+message(STATUS "Found cppzmq version: ${cppzmq_VERSION}")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 message(STATUS "Found nlohmann_json version: ${nlohmann_json_VERSION}")

@@ -11,6 +11,7 @@ Setting up conan:
 *) Go to `~/.conan2/profiles/win64d-profile` and make changes -- I updated `compiler.cppstd` to `20` from the default generated (`14`)
 *) In the project directory, execute:
      conan install . --profile:host=win64d-profile --profile:build=win64d-profile --output-folder=conan-cmake-modules --build=missing
+     # Do these two below if you don't use presets and you build from terminal
      cmake -B out/conan-build -S . -DCMAKE_TOOLCHAIN_FILE=conan-cmake-modules/conan_toolchain.cmake
      cmake --build out/conan-build
 
