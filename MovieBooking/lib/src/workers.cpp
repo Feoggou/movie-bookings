@@ -15,6 +15,16 @@ bool stop = false;
 using Task = std::function<void()>;
 std::queue<Task> task_queue;
 
+
+void post(Task t)
+{
+    {
+        std::lock_guard lock(mtx);
+        task_queue.push(std::move(t));
+    }
+    cv.notify_one();
+}
+
 void thread_callback(std::stop_token stoken)
 {
     while (!stoken.stop_requested()) {
@@ -40,4 +50,32 @@ void start_workers()
 {
     std::cout << "Starting workers..." << std::endl;
     worker_thread = std::jthread(thread_callback);
+}
+
+void request_command(std::function<void()> func)
+{
+    post(func);
+}
+
+namespace movie_booking {
+    std::vector<std::string> API::getPlayingMovies() const
+    {
+        //request_command([&m_service]() { service.getPlayingMovies(); });
+        return {};
+    }
+
+    std::vector<std::string> API::getTheaterNamesForMovie(std::string_view movie) const
+    {
+        return {};
+    }
+
+    std::vector<size_t> API::getAvailableSeats(std::string_view movie, std::string_view theater) const
+    {
+        return {};
+    }
+
+    std::vector<size_t> API::bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats)
+    {
+        return {};
+    }
 }

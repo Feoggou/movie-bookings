@@ -1,3 +1,5 @@
+#pragma once
+
 /**
  * @file movie_booking.h
  * @brief Utility functions for checking values.
