@@ -35,15 +35,13 @@ void thread_callback(std::stop_token stoken)
 
 }
 
-//std::vector<std::jthread> worker_threads;
-
-std::jthread worker_thread;
+std::vector<std::jthread> worker_threads;
 
 void start_workers()
 {
     std::cout << "Starting workers..." << std::endl;
-    worker_thread = std::jthread(thread_callback);
-    //worker_threads = {std::jthread(thread_callback)/*, std::jthread(thread_callback)*/};
+    worker_threads.emplace_back(std::move(thread_callback));
+    worker_threads.emplace_back(std::move(thread_callback));
 }
 
 void request_command(Task &&t)
