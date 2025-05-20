@@ -2,8 +2,8 @@
 fmt/10.1.1
 gtest/1.16.0
 zeromq/4.3.5
-nlohmann-json
-cppzmq
+nlohmann_json/3.12.0
+cppzmq/4.10.0
 
 [generators]
 CMakeToolchain
