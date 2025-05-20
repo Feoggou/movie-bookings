@@ -25,6 +25,12 @@ namespace movie_booking {
 
         std::vector<std::string> result = future.get();
 
+        std::cout << "*** [API] *** playing movies: " << result.size() << " [";
+        for (const auto& s : result) {
+            std::cout << s << ", ";
+        }
+        std::cout << "]" << std::endl;
+
         return result;
     }
 
@@ -40,7 +46,7 @@ namespace movie_booking {
 
         std::vector<std::string> result = future.get();
 
-        std::cout << "#### RESULT: vector size: " << result.size() << " [";
+        std::cout << "*** [API] *** theaters for movie: " << result.size() << " [";
         for (const auto& s : result) {
             std::cout << s << ", ";
         }
@@ -61,7 +67,7 @@ namespace movie_booking {
 
         std::vector<size_t> result = future.get();
 
-        std::cout << "#### SEATS AVAILABLE: vector size: " << result.size() << " [";
+        std::cout << "*** [API] *** seats available: " << result.size() << " [";
         for (const auto& s : result) {
             std::cout << s << ", ";
         }
@@ -82,7 +88,7 @@ namespace movie_booking {
 
         std::vector<size_t> result = future.get();
 
-        std::cout << "#### BOOKED: vector size: " << result.size() << " [";
+        std::cout << "*** [API] *** booked seats: " << result.size() << " [";
         for (const auto& s : result) {
             std::cout << s << ", ";
         }

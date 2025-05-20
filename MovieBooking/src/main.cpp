@@ -39,45 +39,45 @@ void json_foo()
     std::cout << "JSON string: " << json_str << std::endl;
 }
 
-nlohmann::json execute_command(movie_booking::Service &s, string_view command_name, nlohmann::json args)
+nlohmann::json execute_command(movie_booking::API &api, string_view command_name, nlohmann::json args)
 {
     if (command_name == "getPlayingMovies") {
-        return s.getPlayingMovies();
+        return api.getPlayingMovies();
     }
     else if (command_name == "getTheaterNamesForMovie") {
-        std::cout << "args --------- " << args << std::endl;
+        //std::cout << "args --------- " << args << std::endl;
         std::vector<std::string> vec = args;
         if (vec.size() == 1) {
             std::string movie = vec[0];
-            return s.getTheaterNamesForMovie(movie);
+            return api.getTheaterNamesForMovie(movie);
         }
     }
     else if (command_name == "getAvailableSeats") {
-        std::cout << "args --------- " << args << std::endl;
+        //std::cout << "args --------- " << args << std::endl;
         std::vector<std::string> vec = args;
         if (vec.size() == 2) {
             std::string movie = vec[0];
             std::string theater = vec[1];
 
-            return s.getAvailableSeats(movie, theater);
+            return api.getAvailableSeats(movie, theater);
         }
     }
     else if (command_name == "bookSeats") {
-        std::cout << "args --------- " << args << std::endl;
-        std::cout << "args size: " << args.size() << std::endl;
+        //std::cout << "args --------- " << args << std::endl;
+        //std::cout << "args size: " << args.size() << std::endl;
         
         std::string client = args[0];
         std::string movie = args[1];
         std::string theater = args[2];
 
-        std::cout << "client: " << client << std::endl;
-        std::cout << "movie: " << movie << std::endl;
-        std::cout << "theater: " << theater << std::endl;
+        //std::cout << "client: " << client << std::endl;
+        //std::cout << "movie: " << movie << std::endl;
+        //std::cout << "theater: " << theater << std::endl;
         std::vector<size_t> seats = args[3];
 
-        std::cout << "seats: " << seats.size() << " in total " << std::endl;
+        //std::cout << "seats: " << seats.size() << " in total " << std::endl;
 
-        return s.bookSeats(client, movie, theater, seats);
+        return api.bookSeats(client, movie, theater, seats);
     }
 
     return {};
@@ -85,8 +85,10 @@ nlohmann::json execute_command(movie_booking::Service &s, string_view command_na
 
 int main()
 {
-#if 0
-    movie_booking::Service service;
+    start_workers();
+
+    movie_booking::SyncedService service;
+    movie_booking::API api(service);
 
 	std::cout << "Hello World!" << std::endl;
 
@@ -117,7 +119,7 @@ int main()
             if (json.contains("args")) {
                 args = json["args"];
             }
-            json = execute_command(service, json["cmd"], args);
+            json = execute_command(api, json["cmd"], args);
             std::cerr << "JSON result is: " << json << std::endl;
         }
 
@@ -127,22 +129,6 @@ int main()
         memcpy(reply.data(), reply_msg.data(), reply_msg.size());
         socket.send(reply, zmq::send_flags::none);
     }
-#else
-    start_workers();
-
-    movie_booking::SyncedService service;
-    movie_booking::API api(service);
-
-    while (true) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        auto movies = api.getPlayingMovies();
-        auto theaters = api.getTheaterNamesForMovie("Movie A");
-        //std::cout << "theater 2: " << theaters[1] << std::endl;
-        auto seats_avail = api.getAvailableSeats("Movie A", "Theater 2");
-        auto seats_booked = api.bookSeats("joe", "Movie A", "Theater 2", { 0 });
-        seats_avail = api.getAvailableSeats("Movie A", "Theater 2");
-    }
-#endif
 
 	return 0;
 }
