@@ -10,6 +10,10 @@
     {
       "name": "gtest",
       "version>=": "1.16.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.3"
     }
   ]
 }
