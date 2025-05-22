@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Launch Project Executable",
+      "program": "${workspaceFolder}/${input:executablePath}",
+      "stopAtEntry": true,
+      "preLaunchTask": "CMake: build"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "executablePath",
+      "type": "promptString",
+      "description": "Enter the relative path to the executable you want to launch (e.g., build/Debug/yourapp.exe)"
+    }
+  ]
+}
