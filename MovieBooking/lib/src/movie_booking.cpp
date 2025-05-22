@@ -12,88 +12,43 @@
 
 
 namespace movie_booking {
-
-    std::vector<std::string> API::getPlayingMovies() const
+    template <typename R, typename Func>
+    static std::shared_ptr<std::future<R>> runAsync(Func func)
     {
-        auto promise = std::make_shared<std::promise<std::vector<std::string>>>();
-        std::future<std::vector<std::string>> future = promise->get_future();
+        auto promise = std::make_shared<std::promise<R>>();
+        std::future<R> future = promise->get_future();
 
-        request_command([this, promise]() {
-            std::vector<std::string> result = m_service.getPlayingMovies();
+        request_command([promise, func]() {
+            R result = func();
             promise->set_value(result);
             });
 
-        std::vector<std::string> result = future.get();
-
-        std::cout << "*** [API] *** playing movies: " << result.size() << " [";
-        for (const auto& s : result) {
-            std::cout << s << ", ";
-        }
-        std::cout << "]" << std::endl;
-
-        return result;
+        return std::make_shared<std::future<R>>(std::move(future));
     }
 
-    std::vector<std::string> API::getTheaterNamesForMovie(std::string_view movie) const
+    std::shared_ptr<std::future<std::vector<std::string>>> API::getPlayingMovies() const
     {
-        auto promise = std::make_shared<std::promise<std::vector<std::string>>>();
-        std::future<std::vector<std::string>> future = promise->get_future();
-
-        request_command([this, promise, m = std::string(movie)]() {
-            std::vector<std::string> result = m_service.getTheaterNamesForMovie(m);
-            promise->set_value(result);
-            });
-
-        std::vector<std::string> result = future.get();
-
-        std::cout << "*** [API] *** theaters for movie: " << result.size() << " [";
-        for (const auto& s : result) {
-            std::cout << s << ", ";
-        }
-        std::cout << "]" << std::endl;
-
-        return result;
+        return runAsync<std::vector<std::string>>([this]() { return m_service.getPlayingMovies(); });
     }
 
-    std::vector<size_t> API::getAvailableSeats(std::string_view movie, std::string_view theater) const
+    std::shared_ptr<std::future<std::vector<std::string>>> API::getTheaterNamesForMovie(std::string_view movie) const
     {
-        auto promise = std::make_shared<std::promise<std::vector<size_t>>>();
-        std::future<std::vector<size_t>> future = promise->get_future();
-
-        request_command([this, promise, m = std::string(movie), t = std::string(theater)]() {
-            std::vector<size_t> result = m_service.getAvailableSeats(m, t);
-            promise->set_value(result);
+        return runAsync<std::vector<std::string>>([this, m=std::string(movie)]() {
+            return m_service.getTheaterNamesForMovie(m);
             });
-
-        std::vector<size_t> result = future.get();
-
-        std::cout << "*** [API] *** seats available: " << result.size() << " [";
-        for (const auto& s : result) {
-            std::cout << s << ", ";
-        }
-        std::cout << "]" << std::endl;
-
-        return result;
     }
 
-    std::vector<size_t> API::bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats)
+    std::shared_ptr<std::future<std::vector<size_t>>> API::getAvailableSeats(std::string_view movie, std::string_view theater) const
     {
-        auto promise = std::make_shared<std::promise<std::vector<size_t>>>();
-        std::future<std::vector<size_t>> future = promise->get_future();
-
-        request_command([this, promise, c = std::string(client), m = std::string(movie), t = std::string(theater), s = std::vector(seats)]() {
-            std::vector<size_t> result = m_service.bookSeats(c, m, t, s);
-            promise->set_value(result);
+        return runAsync<std::vector<size_t>>([this, m=std::string(movie), t=std::string(theater)]() {
+            return m_service.getAvailableSeats(m, t);
             });
+    }
 
-        std::vector<size_t> result = future.get();
-
-        std::cout << "*** [API] *** booked seats: " << result.size() << " [";
-        for (const auto& s : result) {
-            std::cout << s << ", ";
-        }
-        std::cout << "]" << std::endl;
-
-        return result;
+    std::shared_ptr<std::future<std::vector<size_t>>> API::bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats)
+    {
+        return runAsync<std::vector<size_t>>([this, c=std::string(client), m=std::string(movie), t=std::string(theater), s=std::vector(seats)]() {
+            return m_service.getAvailableSeats(m, t);
+            });
     }
 } // namespace movie_booking

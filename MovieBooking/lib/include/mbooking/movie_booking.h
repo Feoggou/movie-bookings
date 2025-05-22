@@ -6,6 +6,8 @@
 #include <functional>
 #include <vector>
 #include <string>
+#include <memory>
+#include <future>
 
  /**
   * @namespace movie_booking
@@ -38,7 +40,7 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        std::vector<std::string> getPlayingMovies() const;
+        std::shared_ptr<std::future<std::vector<std::string>>> getPlayingMovies() const;
 
         /**
          * @brief Get a list of theaters for the currently playing movie
@@ -50,11 +52,11 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        std::vector<std::string> getTheaterNamesForMovie(std::string_view movie) const;
+        std::shared_ptr<std::future<std::vector<std::string>>> getTheaterNamesForMovie(std::string_view movie) const;
 
-        std::vector<size_t> getAvailableSeats(std::string_view movie, std::string_view theater) const;
+        std::shared_ptr<std::future<std::vector<size_t>>> getAvailableSeats(std::string_view movie, std::string_view theater) const;
 
-        std::vector<size_t> bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
+        std::shared_ptr<std::future<std::vector<size_t>>> bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
 
     private:
         Service& m_service;
