@@ -20,6 +20,24 @@ namespace movie_booking
 {
     class Service;
 
+    class IFutureWrapper
+    {
+    public:
+        virtual ~IFutureWrapper() = default;
+        virtual void wait() = 0;
+    };
+
+    template <typename T>
+    class FutureWrapper : public IFutureWrapper {
+    public:
+        explicit FutureWrapper(std::future<T> f) : fut(std::move(f)) {}
+        void wait() override { fut.wait(); }
+        std::future<T>& get_future() { return fut; }
+
+    private:
+        std::future<T> fut;
+    };
+
     /**
  * @class API
  * @brief A short summary of what API does.
@@ -40,7 +58,7 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        std::shared_ptr<std::future<std::vector<std::string>>> getPlayingMovies() const;
+        std::shared_ptr<FutureWrapper<std::vector<std::string>>> getPlayingMovies() const;
 
         /**
          * @brief Get a list of theaters for the currently playing movie
@@ -52,11 +70,11 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        std::shared_ptr<std::future<std::vector<std::string>>> getTheaterNamesForMovie(std::string_view movie) const;
+        std::shared_ptr<FutureWrapper<std::vector<std::string>>> getTheaterNamesForMovie(std::string_view movie) const;
 
-        std::shared_ptr<std::future<std::vector<size_t>>> getAvailableSeats(std::string_view movie, std::string_view theater) const;
+        std::shared_ptr<FutureWrapper<std::vector<size_t>>> getAvailableSeats(std::string_view movie, std::string_view theater) const;
 
-        std::shared_ptr<std::future<std::vector<size_t>>> bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
+        std::shared_ptr<FutureWrapper<std::vector<size_t>>> bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
 
     private:
         Service& m_service;
