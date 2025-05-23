@@ -130,11 +130,12 @@ int main()
         // 4. Wait for next client request
         auto sock_reply = socket.recv(request, zmq::recv_flags::none);
         std::string received_msg(static_cast<char*>(request.data()), request.size());
-        std::cerr << "Received: " << received_msg << std::endl;
+        //std::cerr << "Received: " << received_msg << std::endl;
 
         nlohmann::json json = nlohmann::json::parse(received_msg);
         if (json.contains("pid")) {
-            std::cerr << "PID is " << json["pid"] << "; cmd=" << json["cmd"] << std::endl;
+            std::cerr << "[" << json["pid"] << "] " << json["cmd"] << std::endl;
+
             nlohmann::json args;
 
             if (json.contains("args")) {

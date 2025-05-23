@@ -35,8 +35,9 @@ def run_all(socket):
         return
 
     seats = reply
-    print("****** Chosen ALL seats: {0} **** ".format(seats))
-    reply = execute_command(socket, "bookSeats", ["mark", movie, theater, seats])
+    print("****** ALL seats: {0} **** ".format(seats))
+    print("****** Reserving first seats {0} **** ".format(seats[0]))
+    reply = execute_command(socket, "bookSeats", ["mark", movie, theater, [seats[0],]])
     print("****** Reserved seats: {0} **** ".format(reply))
 
     reply = execute_command(socket, "getAvailableSeats", [movie, theater])
