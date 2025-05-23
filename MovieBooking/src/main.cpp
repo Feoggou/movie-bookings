@@ -8,6 +8,11 @@
 #include <nlohmann/json.hpp>
 #include <zmq.hpp>
 
+#include <boost/asio.hpp>
+#include <boost/asio/awaitable.hpp>
+#include <boost/asio/use_awaitable.hpp>
+#include <boost/asio/co_spawn.hpp>
+
 #include <iostream>
 #include <chrono>
 #include <thread>
