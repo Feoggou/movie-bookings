@@ -17,6 +17,10 @@
     {
       "name": "nlohmann-json",
       "version>=": "3.11.3"
+    },
+    {
+      "name": "boost-asio",
+      "version>=": "1.87.0"
     }
   ]
 }
