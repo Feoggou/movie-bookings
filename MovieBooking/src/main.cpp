@@ -39,17 +39,19 @@ void json_foo()
     std::cout << "JSON string: " << json_str << std::endl;
 }
 
-nlohmann::json execute_command(movie_booking::API &api, const string &command_name, const nlohmann::json &args)
+std::vector<std::shared_ptr<movie_booking::IFutureWrapper>> g_futures;
+
+void execute_command(movie_booking::API &api, const string &command_name, const nlohmann::json &args)
 {
     if (command_name == "getPlayingMovies") {
-        return api.getPlayingMovies();
+        g_futures.push_back(api.getPlayingMovies());
     }
     else if (command_name == "getTheaterNamesForMovie") {
         //std::cout << "args --------- " << args << std::endl;
         std::vector<std::string> vec = args;
         if (vec.size() == 1) {
             std::string movie = vec[0];
-            return api.getTheaterNamesForMovie(movie);
+            g_futures.push_back(api.getTheaterNamesForMovie(movie));
         }
     }
     else if (command_name == "getAvailableSeats") {
@@ -59,7 +61,7 @@ nlohmann::json execute_command(movie_booking::API &api, const string &command_na
             std::string movie = vec[0];
             std::string theater = vec[1];
 
-            return api.getAvailableSeats(movie, theater);
+            g_futures.push_back(api.getAvailableSeats(movie, theater));
         }
     }
     else if (command_name == "bookSeats") {
@@ -77,10 +79,22 @@ nlohmann::json execute_command(movie_booking::API &api, const string &command_na
 
         //std::cout << "seats: " << seats.size() << " in total " << std::endl;
 
-        return api.bookSeats(client, movie, theater, seats);
+        g_futures.push_back(api.bookSeats(client, movie, theater, seats));
     }
+}
 
-    return {};
+void reply_thread_callback(std::stop_token stoken)
+{
+    while (!stoken.stop_requested())
+    {
+        if (g_futures.empty()) {
+            // sleep
+            continue;
+        }
+
+        // go through all items and see if either is ready.
+        //IFutureWrapper
+    }
 }
 
 int main()
@@ -102,6 +116,8 @@ int main()
     socket.bind("tcp://*:52345");
 
     std::cout << "Server listening on port 52345...\n";
+
+    std::jthread reply_thread(reply_thread_callback);
 
     while (true) {
         zmq::message_t request;
