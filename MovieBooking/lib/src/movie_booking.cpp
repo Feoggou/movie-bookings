@@ -12,42 +12,42 @@
 
 
 namespace movie_booking {
-    template <typename R, typename Func>
-    static std::shared_ptr<FutureWrapper<R>> runAsync(Func func)
+    template <typename Func>
+    static API::SharedFuture runAsync(Func func)
     {
-        auto promise = std::make_shared<std::promise<R>>();
-        std::future<R> future = promise->get_future();
+        auto promise = std::make_shared<std::promise<API::Result>>();
+        std::future<API::Result> future = promise->get_future();
 
         request_command([promise, func]() {
-            R result = func();
+            API::Result result = func();
             promise->set_value(result);
             });
 
-        return std::make_shared<FutureWrapper<R>>(std::move(future));
+        return std::make_shared<API::Future>(std::move(future));
     }
 
-    std::shared_ptr<FutureWrapper<std::vector<std::string>>> API::getPlayingMovies() const
+    API::SharedFuture API::getPlayingMovies() const
     {
-        return runAsync<std::vector<std::string>>([this]() { return m_service.getPlayingMovies(); });
+        return runAsync([this]() { return m_service.getPlayingMovies(); });
     }
 
-    std::shared_ptr<FutureWrapper<std::vector<std::string>>> API::getTheaterNamesForMovie(std::string_view movie) const
+    API::SharedFuture API::getTheaterNamesForMovie(std::string_view movie) const
     {
-        return runAsync<std::vector<std::string>>([this, m=std::string(movie)]() {
+        return runAsync([this, m=std::string(movie)]() {
             return m_service.getTheaterNamesForMovie(m);
             });
     }
 
-    std::shared_ptr<FutureWrapper<std::vector<size_t>>> API::getAvailableSeats(std::string_view movie, std::string_view theater) const
+    API::SharedFuture API::getAvailableSeats(std::string_view movie, std::string_view theater) const
     {
-        return runAsync<std::vector<size_t>>([this, m=std::string(movie), t=std::string(theater)]() {
+        return runAsync([this, m=std::string(movie), t=std::string(theater)]() {
             return m_service.getAvailableSeats(m, t);
             });
     }
 
-    std::shared_ptr<FutureWrapper<std::vector<size_t>>> API::bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats)
+    API::SharedFuture API::bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats)
     {
-        return runAsync<std::vector<size_t>>([this, c=std::string(client), m=std::string(movie), t=std::string(theater), s=std::vector(seats)]() {
+        return runAsync([this, c=std::string(client), m=std::string(movie), t=std::string(theater), s=std::vector(seats)]() {
             return m_service.getAvailableSeats(m, t);
             });
     }

@@ -23,6 +23,12 @@ def execute_command(socket, cmd: str, args:list=None) -> dict:
 
 def run_all(socket):
     reply = execute_command(socket, "getPlayingMovies")
+    if not reply:
+        print("*** NO MOVIES FOUND ***")
+        return
+    else:
+        print("Found movies: {0}".format(reply))
+
     movie = reply[0]
     print("****** Chosen movie: {0} **** ".format(movie))
 

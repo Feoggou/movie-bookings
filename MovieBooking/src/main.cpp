@@ -16,9 +16,16 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <mutex>
+#include <forward_list>
+#include <format>
 
 
 using namespace std;
+
+static std::list<std::shared_ptr<movie_booking::IFutureWrapper>> g_futures;
+
+static std::mutex g_mutex;
 
 void json_foo()
 {
@@ -44,8 +51,6 @@ void json_foo()
     std::cout << "JSON string: " << json_str << std::endl;
 }
 
-std::vector<std::shared_ptr<movie_booking::IFutureWrapper>> g_futures;
-
 void execute_command(movie_booking::API &api, const string &command_name, const nlohmann::json &args)
 {
     if (command_name == "getPlayingMovies") {
@@ -56,6 +61,8 @@ void execute_command(movie_booking::API &api, const string &command_name, const 
         std::vector<std::string> vec = args;
         if (vec.size() == 1) {
             std::string movie = vec[0];
+
+            const std::lock_guard<std::mutex> lock(g_mutex);
             g_futures.push_back(api.getTheaterNamesForMovie(movie));
         }
     }
@@ -66,6 +73,7 @@ void execute_command(movie_booking::API &api, const string &command_name, const 
             std::string movie = vec[0];
             std::string theater = vec[1];
 
+            const std::lock_guard<std::mutex> lock(g_mutex);
             g_futures.push_back(api.getAvailableSeats(movie, theater));
         }
     }
@@ -84,21 +92,62 @@ void execute_command(movie_booking::API &api, const string &command_name, const 
 
         //std::cout << "seats: " << seats.size() << " in total " << std::endl;
 
+        const std::lock_guard<std::mutex> lock(g_mutex);
         g_futures.push_back(api.bookSeats(client, movie, theater, seats));
+    }
+}
+
+inline const char* future_status_name(std::future_status status)
+{
+    switch (status)
+    {
+    case std::future_status::ready: return "READY";
+    case std::future_status::deferred: return "DEFERRED";
+    case std::future_status::timeout: return "TIMEOUT";
+    default: return "UNKNOWN";
     }
 }
 
 void reply_thread_callback(std::stop_token stoken)
 {
+    std::cerr << "reply_thread_callback started..." << std::endl;
+
     while (!stoken.stop_requested())
     {
+        const std::lock_guard<std::mutex> lock(g_mutex);
+
         if (g_futures.empty()) {
-            // sleep
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
             continue;
         }
 
-        // go through all items and see if either is ready.
-        //IFutureWrapper
+        std::cerr << "Found futures: " << g_futures.size() << std::endl;
+        for (auto it = g_futures.begin(); it != g_futures.end();) {
+            //auto future = dynamic_cast<movie_booking::FutureWrapper<int>&>(*(*it));
+            auto future = *it;
+
+            std::cerr << "future status check..." << std::endl;
+            std::future_status status = future->check();
+            std::cerr << "... status: " << future_status_name(status) << std::endl;
+
+            if (status == std::future_status::ready) {
+                auto variantResult = future->result();
+                std::visit([](auto&& vecVal) {
+                    using Result = std::decay<decltype(vecVal)>;
+                    std::cerr << "RESULT: [" << vecVal.size() << "] ";
+                    for (const auto& x : vecVal) {
+                        std::cerr << x << ", ";
+                    }
+                    std::cerr << "]" << std::endl;
+                    }, variantResult);
+                
+                it = g_futures.erase(it);
+                std::cerr << "... removed from queue" << std::endl;
+            }
+            else {
+                ++it;
+            }
+        }
     }
 }
 

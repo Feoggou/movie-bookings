@@ -8,6 +8,8 @@
 #include <string>
 #include <memory>
 #include <future>
+#include <chrono>
+#include <variant>
 
  /**
   * @namespace movie_booking
@@ -23,16 +25,20 @@ namespace movie_booking
     class IFutureWrapper
     {
     public:
+        using Result = std::variant<std::vector<size_t>, std::vector<std::string>>;
+
         virtual ~IFutureWrapper() = default;
-        virtual void wait() = 0;
+        virtual std::future_status check() const = 0;
+        virtual Result result() = 0;
     };
 
     template <typename T>
     class FutureWrapper : public IFutureWrapper {
     public:
         explicit FutureWrapper(std::future<T> f) : fut(std::move(f)) {}
-        void wait() override { fut.wait(); }
+        std::future_status check() const override { return fut.wait_for(std::chrono::milliseconds(0)); }
         std::future<T>& get_future() { return fut; }
+        Result result() override { return  fut.get(); }
 
     private:
         std::future<T> fut;
@@ -49,6 +55,10 @@ namespace movie_booking
     class API
     {
     public:
+        using Result = std::variant<std::vector<size_t>, std::vector<std::string>>;
+        using Future = FutureWrapper<Result>;
+        using SharedFuture = std::shared_ptr<Future>;
+
         explicit API(Service& service) : m_service(service) {}
         /**
          * @brief Get a list of currently playing movies.
@@ -58,7 +68,7 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        std::shared_ptr<FutureWrapper<std::vector<std::string>>> getPlayingMovies() const;
+        SharedFuture getPlayingMovies() const;
 
         /**
          * @brief Get a list of theaters for the currently playing movie
@@ -70,11 +80,11 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        std::shared_ptr<FutureWrapper<std::vector<std::string>>> getTheaterNamesForMovie(std::string_view movie) const;
+        SharedFuture getTheaterNamesForMovie(std::string_view movie) const;
 
-        std::shared_ptr<FutureWrapper<std::vector<size_t>>> getAvailableSeats(std::string_view movie, std::string_view theater) const;
+        SharedFuture getAvailableSeats(std::string_view movie, std::string_view theater) const;
 
-        std::shared_ptr<FutureWrapper<std::vector<size_t>>> bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
+        SharedFuture bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
 
     private:
         Service& m_service;
