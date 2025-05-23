@@ -21,6 +21,8 @@ message(STATUS "Found ZeroMQ version: ${ZeroMQ_VERSION}")
 find_package(cppzmq CONFIG REQUIRED)
 message(STATUS "Found cppzmq version: ${cppzmq_VERSION}")
 find_package(Boost CONFIG REQUIRED COMPONENTS asio)
+message(STATUS "Found Boost version: ${Boost_VERSION}")
+message(STATUS "Boost libraries: ${Boost_LIBRARIES}")
 
 find_package(nlohmann_json CONFIG REQUIRED)
 message(STATUS "Found nlohmann_json version: ${nlohmann_json_VERSION}")

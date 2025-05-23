@@ -14,4 +14,4 @@ CMakeDeps
 fmt/10.1.1:header_only=True
 zeromq/*:shared=True
 gtest/*:shared=False
-boost:header_only=True
+boost/*:header_only=True
