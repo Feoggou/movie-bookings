@@ -140,8 +140,8 @@ int main()
             if (json.contains("args")) {
                 args = json["args"];
             }
-            json = execute_command(api, json["cmd"], args);
-            std::cerr << "JSON result is: " << json << std::endl;
+            /*json = */execute_command(api, json["cmd"], args);
+            //std::cerr << "JSON result is: " << json << std::endl;
         }
 
         // 5. Send reply back to client
