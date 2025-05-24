@@ -3,7 +3,7 @@
 
 #include "src/workers.hpp"
 #include "src/zeromq_async.hpp"
-#include "src/cmd_parse.hpp"
+#include "src/cmd.hpp"
 
 #include <nlohmann/json.hpp>
 
