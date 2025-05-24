@@ -3,7 +3,7 @@
 
 #include "src/mb_service.hpp"
 #include "src/workers.hpp"
-#include "src/zeromq_sync.hpp"
+#include "src/zeromq_async.hpp"
 
 #include <mbooking/movie_booking.h>
 
@@ -163,7 +163,7 @@ int main()
 
     std::jthread reply_thread(reply_thread_callback);
 
-    run_zero_mq_server([&api](std::string_view received_msg) -> std::string {
+    zeromq_async_main([&api](std::string_view received_msg) -> std::string {
         nlohmann::json json = nlohmann::json::parse(received_msg);
         if (json.contains("pid"))
         {
@@ -181,7 +181,7 @@ int main()
             return json.dump();
         }
         return {};
-    });
+        });
 
 	return 0;
 }

@@ -1,3 +1,6 @@
 #pragma once
 
-void zeromq_async_main();
+#include <functional>
+#include <string>
+
+void zeromq_async_main(std::function<std::string(std::string_view)> process_request);

@@ -50,7 +50,7 @@ inline bool is_human_readable(std::string_view sv) {
         });
 }
 
-void zeromq_async_main()
+void zeromq_async_main(std::function<std::string(std::string_view)> process_request)
 {
     router_socket.bind("tcp://*:52345");
 
@@ -114,8 +114,8 @@ void zeromq_async_main()
                 continue;
             }
 
-            // Dispatch async task
-            std::thread(long_running_task, std::move(identity), std::move(content)).detach();
+            std::string result_msg = process_request(content.to_string_view());
+            reply_to(std::move(identity), result_msg);
         }
     }
 }
