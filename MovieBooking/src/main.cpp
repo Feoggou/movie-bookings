@@ -3,7 +3,7 @@
 
 #include "src/mb_service.hpp"
 #include "src/workers.hpp"
-#include "src/zero_mq.hpp"
+#include "src/zeromq_sync.hpp"
 
 #include <mbooking/movie_booking.h>
 

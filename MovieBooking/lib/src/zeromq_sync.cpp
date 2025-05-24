@@ -1,4 +1,4 @@
-#include "zero_mq.hpp"
+#include "zeromq_sync.hpp"
 
 #include <zmq.hpp>
 
