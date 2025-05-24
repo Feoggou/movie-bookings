@@ -1,7 +1,6 @@
 ﻿// MovieBooking.cpp : Defines the entry point for the application.
 //
 
-#include "src/workers.hpp"
 #include "src/zeromq_async.hpp"
 #include "src/cmd.hpp"
 
@@ -14,11 +13,9 @@ using namespace std;
 
 int main()
 {
-    start_workers();
+    std::cerr << "Starting..." << std::endl;
 
     movie_booking::create_service();
-
-	std::cerr << "Starting..." << std::endl;
 
     zeromq_async_main([](std::string_view received_msg) -> std::string {
         nlohmann::json json = nlohmann::json::parse(received_msg);

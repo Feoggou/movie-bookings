@@ -1,10 +1,12 @@
 #include "cmd.hpp"
 
+#include "mb_service.hpp"
+#include "workers.hpp"
+
+#include <mbooking/movie_booking.h>
+
 #include <iostream>
 #include <memory>
-
-#include "mb_service.hpp"
-#include <mbooking/movie_booking.h>
 
 static std::list<std::shared_ptr<movie_booking::IFutureWrapper>> g_futures;
 
@@ -116,12 +118,16 @@ namespace movie_booking {
 
     void start_reply_thread()
     {
+        std::cerr << "Starting response thread..." << std::endl;
         std::jthread reply_thread(reply_thread_callback);
     }
 
     void create_service()
     {
         g_API = std::make_unique<API>(service);
+
+        start_reply_thread();
+        start_workers();
     }
 
 } // namespace movie_booking
