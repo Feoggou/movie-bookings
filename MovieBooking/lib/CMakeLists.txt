@@ -7,6 +7,7 @@ add_library(MovieBookingLib STATIC
             src/workers.cpp src/workers.hpp
             src/zeromq_sync.cpp src/zeromq_sync.hpp
             src/zeromq_async.cpp src/zeromq_async.hpp
+            src/cmd_parse.cpp src/cmd_parse.hpp
             src/utils.hpp
 )
 
