@@ -57,7 +57,7 @@ cmake --build -t doc --preset win-x64-debug
 
 ==================
 
-Use `python3 client_zmq.py` to spawn a client that connects to the app zmq server.
+Use `python3 client_zmq_sync.py` to spawn a client that connects to the app zmq server.
 
 You also have `start_zmq_clients.sh` and `start_zmq_clients.bat` if you want to run multiple clients in parallel.
 
