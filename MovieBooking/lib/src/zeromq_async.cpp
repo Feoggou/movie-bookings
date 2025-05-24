@@ -8,6 +8,7 @@
 #include <queue>
 #include <mutex>
 #include <chrono>
+#include <regex>
 
 zmq::context_t context(1);
 zmq::socket_t router_socket(context, zmq::socket_type::router);
@@ -18,21 +19,40 @@ std::queue<std::pair<zmq::message_t, zmq::message_t>> completed_responses;
 
 void long_running_task(zmq::message_t identity, zmq::message_t content) {
     std::string msg(static_cast<char*>(content.data()), content.size());
-    std::cout << "Processing: " << msg << std::endl;
+    std::cerr << "Processing: " << msg << std::endl;
 
     // Simulate expensive computation
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    std::string reply_msg = "Reply to: " + msg;
-    zmq::message_t reply(reply_msg.begin(), reply_msg.end());
+    zmq::message_t reply(msg.begin(), msg.end());
+
+    std::cerr << std::format("Sending back reply to '{}':\n    {}", identity.to_string_view(), msg) << std::endl;
 
     // Store the result with identity
     std::lock_guard<std::mutex> lock(task_mutex);
     completed_responses.emplace(std::move(identity), std::move(reply));
 }
 
-int zeromq_async_main() {
-    router_socket.bind("tcp://*:5555");
+inline void reply_to(zmq::message_t &&identity, std::string_view reply_msg)
+{
+    zmq::message_t reply(reply_msg);
+
+    router_socket.send(std::move(identity), zmq::send_flags::sndmore);
+    router_socket.send(zmq::message_t(), zmq::send_flags::sndmore);  // empty delimiter frame
+    router_socket.send(reply, zmq::send_flags::none);
+
+    std::cerr << std::format("Sent to client: '{}'", reply_msg) << std::endl;
+}
+
+inline bool is_human_readable(std::string_view sv) {
+    return std::ranges::all_of(sv, [](unsigned char c) {
+        return std::isprint(c);
+        });
+}
+
+void zeromq_async_main()
+{
+    router_socket.bind("tcp://*:52345");
 
     while (true) {
         // Check if new messages are ready to be sent
@@ -60,9 +80,39 @@ int zeromq_async_main() {
             zmq::message_t empty;
             zmq::message_t content;
 
-            router_socket.recv(identity);
-            router_socket.recv(empty);
-            router_socket.recv(content);
+            zmq::recv_result_t result = router_socket.recv(identity);
+            if (!result) {
+                std::cerr << "Failed to receive identity!" << std::endl;
+                continue;
+            }
+
+            result = router_socket.recv(empty);
+            if (!result) {
+                std::cerr << "Failed to receive empty!" << std::endl;
+                continue;
+            }
+
+            result = router_socket.recv(content);
+            if (!result) {
+                std::cerr << "Failed to receive content!" << std::endl;
+                continue;
+            }
+
+            std::cerr << "Received identity: " << identity << std::endl;
+            std::string_view id_view = identity.to_string_view();
+
+            if (not is_human_readable(id_view)) {
+                reply_to(std::move(identity), R"({"error": "Identity is expected to be a string/UTF-8"})");
+                continue;
+            }
+
+            std::regex pattern(R"(client-\d+)");
+
+            std::cerr << "Constructed regex pattern" << std::endl;
+            if (not std::regex_match(id_view.cbegin(), id_view.cend(), pattern)) {
+                reply_to(std::move(identity), R"({"error": "Identity is expected to have a format like `client-<number>`"})");
+                continue;
+            }
 
             // Dispatch async task
             std::thread(long_running_task, std::move(identity), std::move(content)).detach();

@@ -6,7 +6,8 @@ import time
 import json
 
 PID = os.getpid()
-print(f"PID={PID}")
+CLIENT_NAME = "client-{0}".format(PID)
+print(f"CLIENT_NAME={CLIENT_NAME}")
 
 
 def execute_command(socket, cmd: str, args:list=None) -> dict:
@@ -19,15 +20,27 @@ def execute_command(socket, cmd: str, args:list=None) -> dict:
     print(f"[{PID}] --- reply: {reply}")
     time.sleep(1)
 
-    return json.loads(reply)
+    try:
+        return json.loads(reply)
+    except Exception as e:
+        print(f"Failed to parse received message as json: {e}")
+        return {"error": "NOT JSON"}
 
 def run_all(socket):
     reply = execute_command(socket, "getPlayingMovies")
     if not reply:
         print("*** NO MOVIES FOUND ***")
         return
-    else:
-        print("Found movies: {0}".format(reply))
+
+    if type(reply) is dict and "error" in reply:
+        print("Error from MovieBooking server: {}".format(reply["error"]))
+        return
+
+    if type(reply) is not list:
+        print("Expected to receive a list back!")
+        return
+
+    print("Found movies: {0}".format(reply))
 
     movie = reply[0]
     print("****** Chosen movie: {0} **** ".format(movie))
@@ -60,6 +73,10 @@ context = zmq.Context()
 
 # 2. Create a REQ (Request) socket
 socket = context.socket(zmq.REQ)
+
+socket.setsockopt(zmq.RCVTIMEO, 5000) 
+socket.setsockopt(zmq.SNDTIMEO, 3000) 
+socket.setsockopt_string(zmq.IDENTITY, CLIENT_NAME)
 
 # 3. Connect to the server
 socket.connect("tcp://localhost:52345")
