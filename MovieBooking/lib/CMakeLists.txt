@@ -5,6 +5,7 @@ add_library(MovieBookingLib STATIC
             src/movie_booking.cpp src/movie_booking.hpp
             src/mb_service.cpp src/mb_service.hpp
             src/workers.cpp src/workers.hpp
+            src/zero_mq.cpp src/zero_mq.hpp
             src/utils.hpp
 )
 
