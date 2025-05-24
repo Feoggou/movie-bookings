@@ -28,30 +28,6 @@ static std::list<std::shared_ptr<movie_booking::IFutureWrapper>> g_futures;
 
 static std::mutex g_mutex;
 
-void json_foo()
-{
-    std::string json_str = R"(["apple", "banana", "cherry"])";
-
-    // Parse JSON string
-    nlohmann::json j = nlohmann::json::parse(json_str);
-
-    // Convert to vector
-    std::vector<std::string> vec = j.get<std::vector<std::string>>();
-
-    for (const auto& s : vec) {
-        std::cout << s << std::endl;
-    }
-
-    // **************
-
-    j = vec;
-
-    // Convert JSON to string
-    json_str = j.dump(4); // Optional: j.dump(4) for pretty-print
-
-    std::cout << "JSON string: " << json_str << std::endl;
-}
-
 void execute_command(movie_booking::API &api, const string &command_name, const nlohmann::json &args)
 {
     if (command_name == "getPlayingMovies") {
