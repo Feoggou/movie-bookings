@@ -3,10 +3,11 @@
 
 #include "src/mb_service.hpp"
 #include "src/workers.hpp"
+#include "src/zero_mq.hpp"
+
 #include <mbooking/movie_booking.h>
 
 #include <nlohmann/json.hpp>
-#include <zmq.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/asio/awaitable.hpp>
@@ -158,31 +159,14 @@ int main()
     movie_booking::SyncedService service;
     movie_booking::API api(service);
 
-	std::cout << "Hello World!" << std::endl;
-
-    // 1. Create ZeroMQ context with a single IO thread
-    zmq::context_t context(1);
-
-    // 2. Create REP (reply) socket
-    zmq::socket_t socket(context, zmq::socket_type::rep);
-
-    // 3. Bind to TCP port
-    socket.bind("tcp://*:52345");
-
-    std::cout << "Server listening on port 52345...\n";
+	std::cerr << "Starting..." << std::endl;
 
     std::jthread reply_thread(reply_thread_callback);
 
-    while (true) {
-        zmq::message_t request;
-
-        // 4. Wait for next client request
-        auto sock_reply = socket.recv(request, zmq::recv_flags::none);
-        std::string received_msg(static_cast<char*>(request.data()), request.size());
-        //std::cerr << "Received: " << received_msg << std::endl;
-
+    run_zero_mq_server([&api](std::string_view received_msg) -> std::string {
         nlohmann::json json = nlohmann::json::parse(received_msg);
-        if (json.contains("pid")) {
+        if (json.contains("pid"))
+        {
             std::cerr << "[" << json["pid"] << "] " << json["cmd"] << std::endl;
 
             nlohmann::json args;
@@ -192,14 +176,12 @@ int main()
             }
             /*json = */execute_command(api, json["cmd"], args);
             //std::cerr << "JSON result is: " << json << std::endl;
-        }
 
-        // 5. Send reply back to client
-        std::string reply_msg = json.dump();
-        zmq::message_t reply(reply_msg.size());
-        memcpy(reply.data(), reply_msg.data(), reply_msg.size());
-        socket.send(reply, zmq::send_flags::none);
-    }
+            json = { };
+            return json.dump();
+        }
+        return {};
+    });
 
 	return 0;
 }

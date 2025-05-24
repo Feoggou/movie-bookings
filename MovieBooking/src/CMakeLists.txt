@@ -11,4 +11,4 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET MovieBooking PROPERTY CXX_STANDARD 20)
 endif()
 
-target_link_libraries(MovieBooking PRIVATE MovieBookingLib libzmq nlohmann_json::nlohmann_json "cppzmq-static" Boost::boost)
+target_link_libraries(MovieBooking PRIVATE MovieBookingLib nlohmann_json::nlohmann_json "cppzmq-static" Boost::boost)
