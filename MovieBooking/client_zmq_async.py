@@ -4,6 +4,8 @@ import zmq
 import os
 import time
 import json
+import uuid
+
 
 PID = os.getpid()
 CLIENT_NAME = "client-{0}".format(PID)
@@ -81,24 +83,22 @@ socket.setsockopt_string(zmq.IDENTITY, CLIENT_NAME)
 # 3. Connect to the server
 socket.connect("tcp://localhost:52345")
 
-message = json.dumps({"pid": PID, "cmd": "getPlayingMovies", "rq": "A"})
-socket.send_string(message)
+request_id_a = str(uuid.uuid4())
+print(f"request_id A: {request_id_a}")
 
-message = json.dumps({"pid": PID, "cmd": "getPlayingMovies", "rq": "B"})
+message = json.dumps({"request_id": request_id_a, "cmd": "getPlayingMovies", "rq": "A"})
 socket.send_string(message)
 
 # Receive replies (order is not guaranteed)
 try:
-    reply1 = socket.recv_string()
-    print("Received REPLY 1:", reply1)
-    print(f"Reply type: {type(reply1)} length={len(reply1)}")
-
-    reply2 = socket.recv_string()
-    print("Received REPLY 2:", reply2)
+    reply1_str = socket.recv_string()
+    reply1 = json.loads(reply1_str)
+    print("Received REPLY 1:",)
+    print("    ID=", reply1["request_id"])
+    print("    RESPONSE=", reply1["response"])
 
 except zmq.Again:
     print("Timed out waiting for replies")
-
 
 
 print("Bye!")

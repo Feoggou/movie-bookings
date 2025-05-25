@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include <iostream>
+#include <format>
 
 
 using namespace std;
@@ -17,18 +18,20 @@ int main()
 
     movie_booking::create_service(zeromq_async_reply);
 
-    zeromq_async_main([](std::string_view request_id, std::string_view received_msg) {
+    zeromq_async_main([](std::string_view client_id, std::string_view received_msg) {
         nlohmann::json json = nlohmann::json::parse(received_msg);
-        if (json.contains("pid"))
+        if (json.contains("request_id"))
         {
-            std::cerr << "[" << json["pid"] << "] " << json["cmd"] << std::endl;
+            std::cerr << std::format("(main) client_id='{}'; request_id='{}'; command={}", client_id, std::string(json["request_id"]), json["cmd"].dump()) << std::endl;
 
             nlohmann::json args;
 
             if (json.contains("args")) {
                 args = json["args"];
             }
-            movie_booking::execute_command(request_id, zeromq_async_reply, json["cmd"], args);;
+
+            movie_booking::ID id = { .client = std::string(client_id), .request = std::string(json["request_id"]) };
+            movie_booking::execute_command(id, json["cmd"], args);;
         }
     });
 

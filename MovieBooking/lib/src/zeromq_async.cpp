@@ -58,9 +58,9 @@ inline void reply_to(zmq::message_t &&identity, std::string_view reply_msg)
     zmq::send_multipart(router_socket, make_vector(std::move(identity), zmq::message_t(reply_msg)));
 }
 
-void zeromq_async_reply(std::string_view request_id, std::string_view reply_msg)
+void zeromq_async_reply(std::string_view client_id, std::string_view reply_msg)
 {
-    reply_to(zmq::message_t(request_id), reply_msg);
+    reply_to(zmq::message_t(client_id), reply_msg);
 }
 
 inline bool is_human_readable(std::string_view sv) {
@@ -96,28 +96,22 @@ void zeromq_async_main(std::function<void(std::string_view, std::string_view)> p
         zmq::poll(items, 1, std::chrono::milliseconds(100));  // short timeout
 
         if (items[0].revents & ZMQ_POLLIN) {
-            // Receive the full multipart message: [identity][empty][content]
-            zmq::message_t identity;
-            zmq::message_t empty;
-            zmq::message_t content;
 
-            zmq::recv_result_t result = router_socket.recv(identity);
+            std::vector<zmq::message_t> frames;
+            zmq::recv_result_t result = zmq::recv_multipart(router_socket, std::back_inserter(frames));
             if (!result) {
-                std::cerr << "Failed to receive identity!" << std::endl;
+                std::cerr << "Failed to receive multipart message!" << std::endl;
                 continue;
             }
 
-            result = router_socket.recv(empty);
-            if (!result) {
-                std::cerr << "Failed to receive empty!" << std::endl;
+            if (frames.size() != 2) {
+                std::cerr << std::format("Received the wrong number of frames. Expected: {} frames; Actual: {} frames. Please make sure your client socket is a DEALER.", 2, frames.size()) << std::endl;
+                reply_to(std::move(frames[0]), R"({"error": "Internal error"})");
                 continue;
             }
 
-            result = router_socket.recv(content);
-            if (!result) {
-                std::cerr << "Failed to receive content!" << std::endl;
-                continue;
-            }
+            zmq::message_t identity = std::move(frames[0]);
+            zmq::message_t content = std::move(frames[1]);
 
             std::cerr << "Received identity: " << identity << std::endl;
             std::cerr << "Received content: " << content << std::endl;

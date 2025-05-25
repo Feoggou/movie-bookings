@@ -19,11 +19,11 @@ namespace movie_booking {
     static SyncedService service;
     std::unique_ptr<API> g_API;
 
-    void execute_command(std::string_view request_id, std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply, const std::string& command_name, const nlohmann::json& args)
+    void execute_command(const ID &id, const std::string& command_name, const nlohmann::json& args)
     {
         if (command_name == "getPlayingMovies") {
             std::cerr << "command = 'getPlayingMovies' => pushing to futures list" << std::endl;
-            g_futures.push_back(g_API->getPlayingMovies(request_id));
+            g_futures.push_back(g_API->getPlayingMovies(id));
             std::cerr << "... pushed" << std::endl;
         }
         else if (command_name == "getTheaterNamesForMovie") {
@@ -33,7 +33,7 @@ namespace movie_booking {
                 std::string movie = vec[0];
 
                 const std::lock_guard<std::mutex> lock(g_mutex);
-                g_futures.push_back(g_API->getTheaterNamesForMovie(request_id, movie));
+                g_futures.push_back(g_API->getTheaterNamesForMovie(id, movie));
             }
         }
         else if (command_name == "getAvailableSeats") {
@@ -44,7 +44,7 @@ namespace movie_booking {
                 std::string theater = vec[1];
 
                 const std::lock_guard<std::mutex> lock(g_mutex);
-                g_futures.push_back(g_API->getAvailableSeats(request_id, movie, theater));
+                g_futures.push_back(g_API->getAvailableSeats(id, movie, theater));
             }
         }
         else if (command_name == "bookSeats") {
@@ -63,7 +63,7 @@ namespace movie_booking {
             //std::cout << "seats: " << seats.size() << " in total " << std::endl;
 
             const std::lock_guard<std::mutex> lock(g_mutex);
-            g_futures.push_back(g_API->bookSeats(request_id, client, movie, theater, seats));
+            g_futures.push_back(g_API->bookSeats(id, client, movie, theater, seats));
         }
     }
 
@@ -78,32 +78,21 @@ namespace movie_booking {
         }
     }
 
-    static void processResult(const IFutureWrapper::Result& resultPair, std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply)
+    static void processResult(const IFutureWrapper::Result& resultPair, std::function<void(std::string_view, std::string_view)> process_reply)
     {
-        const auto &[request_id, variantResult] = resultPair;
+        const auto &[id, variantResult] = resultPair;
 
-        std::visit([&request_id, process_reply](auto&& vecVal) {
+        std::visit([&id, process_reply](auto&& vecVal) {
             using Result = std::decay<decltype(vecVal)>;
-            
-            std::cerr << "RESULT: [" << vecVal.size() << "] ";
-            for (const auto& x : vecVal) {
-                std::cerr << x << ", ";
-            }
-            std::cerr << "]" << std::endl;
 
-            nlohmann::json json = vecVal;
+            nlohmann::json json = { { "request_id", id.request }, { "response", vecVal } };
 
-            std::cerr << "Request id: " << request_id << std::endl;
-            std::cerr << "json: " << json.dump() << std::endl;
-
-            std::cerr << std::format("Response json for '{}': {}", request_id, json.dump()) << std::endl;
-
-            process_reply(request_id, json.dump());
+            process_reply(id.client, json.dump());
 
             }, variantResult);
     }
 
-    static void reply_thread_callback(std::stop_token stoken, std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply)
+    static void reply_thread_callback(std::stop_token stoken, std::function<void(std::string_view, std::string_view)> process_reply)
     {
         std::cerr << "reply_thread_callback started..." << std::endl;
 
@@ -139,13 +128,13 @@ namespace movie_booking {
         std::cerr << "Stop requested => response thread quitting!" << std::endl;
     }
 
-    void start_reply_thread(std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply)
+    void start_reply_thread(std::function<void(std::string_view, std::string_view)> process_reply)
     {
         std::cerr << "Starting response thread..." << std::endl;
         reply_thread = std::move(std::jthread(reply_thread_callback, process_reply));
     }
 
-    void create_service(std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply)
+    void create_service(std::function<void(std::string_view, std::string_view)> process_reply)
     {
         g_API = std::make_unique<API>(service);
 

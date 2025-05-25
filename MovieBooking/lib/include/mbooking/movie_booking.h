@@ -1,3 +1,5 @@
+#pragma once
+
 /**
  * @file movie_booking.h
  * @brief The main API to be used by clients of the library
@@ -20,13 +22,19 @@
   */
 namespace movie_booking
 {
+    struct ID
+    {
+        std::string client;
+        std::string request;
+    };
+
     class Service;
 
     class IFutureWrapper
     {
     public:
         using Variant = std::variant<std::vector<size_t>, std::vector<std::string>>;
-        using Result = std::pair<std::string, Variant>;
+        using Result = std::pair<ID, Variant>;
 
         virtual ~IFutureWrapper() = default;
         virtual std::future_status check() const = 0;
@@ -57,7 +65,7 @@ namespace movie_booking
     {
     public:
         using Variant = std::variant<std::vector<size_t>, std::vector<std::string>>;
-        using Result = std::pair<std::string, Variant>;
+        using Result = std::pair<ID, Variant>;
         using Future = FutureWrapper<Result>;
         using SharedFuture = std::shared_ptr<Future>;
 
@@ -70,7 +78,7 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        SharedFuture getPlayingMovies(std::string_view request_id) const;
+        SharedFuture getPlayingMovies(const ID &id) const;
 
         /**
          * @brief Get a list of theaters for the currently playing movie
@@ -82,11 +90,11 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        SharedFuture getTheaterNamesForMovie(std::string_view request_id, std::string_view movie) const;
+        SharedFuture getTheaterNamesForMovie(const ID& id, std::string_view movie) const;
 
-        SharedFuture getAvailableSeats(std::string_view request_id, std::string_view movie, std::string_view theater) const;
+        SharedFuture getAvailableSeats(const ID& id, std::string_view movie, std::string_view theater) const;
 
-        SharedFuture bookSeats(std::string_view request_id, std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
+        SharedFuture bookSeats(const ID& id, std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
 
     private:
         Service& m_service;
