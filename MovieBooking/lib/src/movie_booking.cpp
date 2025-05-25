@@ -48,7 +48,7 @@ namespace movie_booking {
     API::SharedFuture API::bookSeats(const ID& id, std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats)
     {
         return runAsync(id, [this, c=std::string(client), m=std::string(movie), t=std::string(theater), s=std::vector(seats)]() {
-            return m_service.getAvailableSeats(m, t);
+            return m_service.bookSeats(c, m, t, s);
             });
     }
 } // namespace movie_booking
