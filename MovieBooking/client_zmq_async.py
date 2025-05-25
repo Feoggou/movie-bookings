@@ -72,7 +72,7 @@ def run_all(socket):
 context = zmq.Context()
 
 # 2. Create a REQ (Request) socket
-socket = context.socket(zmq.REQ)
+socket = context.socket(zmq.DEALER)
 
 socket.setsockopt(zmq.RCVTIMEO, 5000) 
 socket.setsockopt(zmq.SNDTIMEO, 3000) 
@@ -81,9 +81,24 @@ socket.setsockopt_string(zmq.IDENTITY, CLIENT_NAME)
 # 3. Connect to the server
 socket.connect("tcp://localhost:52345")
 
+message = json.dumps({"pid": PID, "cmd": "getPlayingMovies", "rq": "A"})
+socket.send_string(message)
 
-# for i in range(3):
-run_all(socket)
+message = json.dumps({"pid": PID, "cmd": "getPlayingMovies", "rq": "B"})
+socket.send_string(message)
+
+# Receive replies (order is not guaranteed)
+try:
+    reply1 = socket.recv_string()
+    print("Received REPLY 1:", reply1)
+    print(f"Reply type: {type(reply1)} length={len(reply1)}")
+
+    reply2 = socket.recv_string()
+    print("Received REPLY 2:", reply2)
+
+except zmq.Again:
+    print("Timed out waiting for replies")
+
 
 
 print("Bye!")

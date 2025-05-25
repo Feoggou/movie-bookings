@@ -1,6 +1,9 @@
 #include "zeromq_async.hpp"
 
 #include <zmq.hpp>
+#include <zmq_addon.hpp>
+
+
 #include <string>
 #include <iostream>
 #include <thread>
@@ -10,8 +13,24 @@
 #include <chrono>
 #include <regex>
 
+template<typename... T>
+concept AllArgsAreRValueRef = (std::is_rvalue_reference_v<T&&> && ...);
+
 zmq::context_t context(1);
 zmq::socket_t router_socket(context, zmq::socket_type::router);
+
+template<typename... T> requires AllArgsAreRValueRef<T...>
+inline auto make_vector(T&&... items)
+{
+    using ValueType = std::decay_t<std::common_type_t<T...>>;
+
+    std::vector<ValueType> vec;
+
+    vec.reserve(sizeof...(items));
+    (vec.push_back(std::move(items)), ...);
+
+    return vec;
+}
 
 // Work queue
 std::mutex task_mutex;
@@ -35,13 +54,8 @@ void long_running_task(zmq::message_t identity, zmq::message_t content) {
 
 inline void reply_to(zmq::message_t &&identity, std::string_view reply_msg)
 {
-    zmq::message_t reply(reply_msg);
-
-    router_socket.send(std::move(identity), zmq::send_flags::sndmore);
-    router_socket.send(zmq::message_t(), zmq::send_flags::sndmore);  // empty delimiter frame
-    router_socket.send(reply, zmq::send_flags::none);
-
-    std::cerr << std::format("Sent to client: '{}'", reply_msg) << std::endl;
+    std::cerr << std::format("REPLY TO '{}': {}\n", identity.to_string_view(), reply_msg);
+    zmq::send_multipart(router_socket, make_vector(std::move(identity), zmq::message_t(reply_msg)));
 }
 
 void zeromq_async_reply(std::string_view request_id, std::string_view reply_msg)
@@ -106,6 +120,7 @@ void zeromq_async_main(std::function<void(std::string_view, std::string_view)> p
             }
 
             std::cerr << "Received identity: " << identity << std::endl;
+            std::cerr << "Received content: " << content << std::endl;
             std::string_view id_view = identity.to_string_view();
 
             if (not is_human_readable(id_view)) {
