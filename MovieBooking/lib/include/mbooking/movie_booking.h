@@ -25,7 +25,8 @@ namespace movie_booking
     class IFutureWrapper
     {
     public:
-        using Result = std::variant<std::vector<size_t>, std::vector<std::string>>;
+        using Variant = std::variant<std::vector<size_t>, std::vector<std::string>>;
+        using Result = std::pair<std::string, Variant>;
 
         virtual ~IFutureWrapper() = default;
         virtual std::future_status check() const = 0;
@@ -55,7 +56,8 @@ namespace movie_booking
     class API
     {
     public:
-        using Result = std::variant<std::vector<size_t>, std::vector<std::string>>;
+        using Variant = std::variant<std::vector<size_t>, std::vector<std::string>>;
+        using Result = std::pair<std::string, Variant>;
         using Future = FutureWrapper<Result>;
         using SharedFuture = std::shared_ptr<Future>;
 
@@ -68,7 +70,7 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        SharedFuture getPlayingMovies() const;
+        SharedFuture getPlayingMovies(std::string_view request_id) const;
 
         /**
          * @brief Get a list of theaters for the currently playing movie
@@ -80,11 +82,11 @@ namespace movie_booking
          *
          * @return A vector of strings containing the titles of currently playing movies.
          */
-        SharedFuture getTheaterNamesForMovie(std::string_view movie) const;
+        SharedFuture getTheaterNamesForMovie(std::string_view request_id, std::string_view movie) const;
 
-        SharedFuture getAvailableSeats(std::string_view movie, std::string_view theater) const;
+        SharedFuture getAvailableSeats(std::string_view request_id, std::string_view movie, std::string_view theater) const;
 
-        SharedFuture bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
+        SharedFuture bookSeats(std::string_view request_id, std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
 
     private:
         Service& m_service;

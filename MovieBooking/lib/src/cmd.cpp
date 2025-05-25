@@ -7,19 +7,24 @@
 
 #include <iostream>
 #include <memory>
+#include <format>
 
 static std::list<std::shared_ptr<movie_booking::IFutureWrapper>> g_futures;
 
 static std::mutex g_mutex;
 
+static std::jthread reply_thread;
+
 namespace movie_booking {
     static SyncedService service;
     std::unique_ptr<API> g_API;
 
-    void execute_command(const std::string& command_name, const nlohmann::json& args)
+    void execute_command(std::string_view request_id, std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply, const std::string& command_name, const nlohmann::json& args)
     {
         if (command_name == "getPlayingMovies") {
-            g_futures.push_back(g_API->getPlayingMovies());
+            std::cerr << "command = 'getPlayingMovies' => pushing to futures list" << std::endl;
+            g_futures.push_back(g_API->getPlayingMovies(request_id));
+            std::cerr << "... pushed" << std::endl;
         }
         else if (command_name == "getTheaterNamesForMovie") {
             //std::cout << "args --------- " << args << std::endl;
@@ -28,7 +33,7 @@ namespace movie_booking {
                 std::string movie = vec[0];
 
                 const std::lock_guard<std::mutex> lock(g_mutex);
-                g_futures.push_back(g_API->getTheaterNamesForMovie(movie));
+                g_futures.push_back(g_API->getTheaterNamesForMovie(request_id, movie));
             }
         }
         else if (command_name == "getAvailableSeats") {
@@ -39,7 +44,7 @@ namespace movie_booking {
                 std::string theater = vec[1];
 
                 const std::lock_guard<std::mutex> lock(g_mutex);
-                g_futures.push_back(g_API->getAvailableSeats(movie, theater));
+                g_futures.push_back(g_API->getAvailableSeats(request_id, movie, theater));
             }
         }
         else if (command_name == "bookSeats") {
@@ -58,7 +63,7 @@ namespace movie_booking {
             //std::cout << "seats: " << seats.size() << " in total " << std::endl;
 
             const std::lock_guard<std::mutex> lock(g_mutex);
-            g_futures.push_back(g_API->bookSeats(client, movie, theater, seats));
+            g_futures.push_back(g_API->bookSeats(request_id, client, movie, theater, seats));
         }
     }
 
@@ -73,7 +78,32 @@ namespace movie_booking {
         }
     }
 
-    static void reply_thread_callback(std::stop_token stoken)
+    static void processResult(const IFutureWrapper::Result& resultPair, std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply)
+    {
+        const auto &[request_id, variantResult] = resultPair;
+
+        std::visit([&request_id, process_reply](auto&& vecVal) {
+            using Result = std::decay<decltype(vecVal)>;
+            
+            std::cerr << "RESULT: [" << vecVal.size() << "] ";
+            for (const auto& x : vecVal) {
+                std::cerr << x << ", ";
+            }
+            std::cerr << "]" << std::endl;
+
+            nlohmann::json json = vecVal;
+
+            std::cerr << "Request id: " << request_id << std::endl;
+            std::cerr << "json: " << json.dump() << std::endl;
+
+            std::cerr << std::format("Response json for '{}': {}", request_id, json.dump()) << std::endl;
+
+            process_reply(request_id, json.dump());
+
+            }, variantResult);
+    }
+
+    static void reply_thread_callback(std::stop_token stoken, std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply)
     {
         std::cerr << "reply_thread_callback started..." << std::endl;
 
@@ -88,7 +118,6 @@ namespace movie_booking {
 
             std::cerr << "Found futures: " << g_futures.size() << std::endl;
             for (auto it = g_futures.begin(); it != g_futures.end();) {
-                //auto future = dynamic_cast<movie_booking::FutureWrapper<int>&>(*(*it));
                 auto future = *it;
 
                 std::cerr << "future status check..." << std::endl;
@@ -96,15 +125,7 @@ namespace movie_booking {
                 std::cerr << "... status: " << future_status_name(status) << std::endl;
 
                 if (status == std::future_status::ready) {
-                    auto variantResult = future->result();
-                    std::visit([](auto&& vecVal) {
-                        using Result = std::decay<decltype(vecVal)>;
-                        std::cerr << "RESULT: [" << vecVal.size() << "] ";
-                        for (const auto& x : vecVal) {
-                            std::cerr << x << ", ";
-                        }
-                        std::cerr << "]" << std::endl;
-                        }, variantResult);
+                    processResult(future->result(), process_reply);
 
                     it = g_futures.erase(it);
                     std::cerr << "... removed from queue" << std::endl;
@@ -114,19 +135,21 @@ namespace movie_booking {
                 }
             }
         }
+
+        std::cerr << "Stop requested => response thread quitting!" << std::endl;
     }
 
-    void start_reply_thread()
+    void start_reply_thread(std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply)
     {
         std::cerr << "Starting response thread..." << std::endl;
-        std::jthread reply_thread(reply_thread_callback);
+        reply_thread = std::move(std::jthread(reply_thread_callback, process_reply));
     }
 
-    void create_service()
+    void create_service(std::function<void(std::string_view request_id, std::string_view reply_msg)> process_reply)
     {
         g_API = std::make_unique<API>(service);
 
-        start_reply_thread();
+        start_reply_thread(process_reply);
         start_workers();
     }
 

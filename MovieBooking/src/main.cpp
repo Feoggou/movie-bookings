@@ -15,9 +15,9 @@ int main()
 {
     std::cerr << "Starting..." << std::endl;
 
-    movie_booking::create_service();
+    movie_booking::create_service(zeromq_async_reply);
 
-    zeromq_async_main([](std::string_view received_msg) -> std::string {
+    zeromq_async_main([](std::string_view request_id, std::string_view received_msg) {
         nlohmann::json json = nlohmann::json::parse(received_msg);
         if (json.contains("pid"))
         {
@@ -28,14 +28,9 @@ int main()
             if (json.contains("args")) {
                 args = json["args"];
             }
-            /*json = */movie_booking::execute_command(json["cmd"], args);
-            //std::cerr << "JSON result is: " << json << std::endl;
-
-            json = { };
-            return json.dump();
+            movie_booking::execute_command(request_id, zeromq_async_reply, json["cmd"], args);;
         }
-        return {};
-        });
+    });
 
 	return 0;
 }

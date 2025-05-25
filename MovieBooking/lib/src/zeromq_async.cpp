@@ -44,17 +44,23 @@ inline void reply_to(zmq::message_t &&identity, std::string_view reply_msg)
     std::cerr << std::format("Sent to client: '{}'", reply_msg) << std::endl;
 }
 
+void zeromq_async_reply(std::string_view request_id, std::string_view reply_msg)
+{
+    reply_to(zmq::message_t(request_id), reply_msg);
+}
+
 inline bool is_human_readable(std::string_view sv) {
     return std::ranges::all_of(sv, [](unsigned char c) {
         return std::isprint(c);
         });
 }
 
-void zeromq_async_main(std::function<std::string(std::string_view)> process_request)
+void zeromq_async_main(std::function<void(std::string_view, std::string_view)> process_request)
 {
     router_socket.bind("tcp://*:52345");
 
     while (true) {
+#if 0
         // Check if new messages are ready to be sent
         {
             std::lock_guard<std::mutex> lock(task_mutex);
@@ -67,6 +73,7 @@ void zeromq_async_main(std::function<std::string(std::string_view)> process_requ
                 router_socket.send(reply, zmq::send_flags::none);
             }
         }
+#endif
 
         // Poll for incoming messages (non-blocking)
         zmq::pollitem_t items[] = {
@@ -107,15 +114,12 @@ void zeromq_async_main(std::function<std::string(std::string_view)> process_requ
             }
 
             std::regex pattern(R"(client-\d+)");
-
-            std::cerr << "Constructed regex pattern" << std::endl;
             if (not std::regex_match(id_view.cbegin(), id_view.cend(), pattern)) {
                 reply_to(std::move(identity), R"({"error": "Identity is expected to have a format like `client-<number>`"})");
                 continue;
             }
 
-            std::string result_msg = process_request(content.to_string_view());
-            reply_to(std::move(identity), result_msg);
+            process_request(id_view, content.to_string_view());
         }
     }
 }
