@@ -25,7 +25,8 @@ void thread_callback(std::stop_token stoken)
             std::unique_lock lock(mtx);
             cv.wait(lock, [] { return stop || !task_queue.empty(); });
 
-            if (stop && task_queue.empty()) break;
+            if (stop && task_queue.empty())
+                break;
 
             task = std::move(task_queue.front());
             task_queue.pop();
