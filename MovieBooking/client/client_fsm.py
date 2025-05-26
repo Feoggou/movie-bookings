@@ -1,69 +1,9 @@
-# install using `pip install pyzmq transitions`
-
 import zmq
-import os
-import time
-import json
-import threading
-import uuid
-
-import queue
 
 from transitions import Machine
 
-
-PID = os.getpid()
-CLIENT_NAME = "client-{0}".format(PID)
-print(f"CLIENT_NAME={CLIENT_NAME}")
-
-receiver_stop_event = threading.Event()
-zmqLock = threading.Lock()
-
-responses: dict = {}
-
-expect_response_event = threading.Event()
-
-def exit_on_error(func):
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            print(f"Function FAILED  with error {type(e).__name__}: \"{str(e)}\"=> exiting")
-            exit(1)
-    return wrapper
-
-
-class ZmqClient:
-    def __init__(self, request_id: str, socket: zmq.Socket):
-        self.request_id = request_id
-        self.socket = socket
-
-    def request(self, cmd_name: str, *args) -> None:
-        if args:
-            message = json.dumps({"request_id": self.request_id, "cmd": cmd_name, "args": list(args)})
-        else:
-            message = json.dumps({"request_id": self.request_id, "cmd": cmd_name})
-
-        # print("lock zmq...")
-        with zmqLock:
-            self.socket.send_string(message)
-            # socket.send_multipart([request_id_a.encode("utf-8"), message.encode("utf-8")])
-            expect_response_event.set()
-        # print("... unlock zmq")
-
-    def get_response(self, timeout=None) -> list:
-        if timeout is None:
-            timeout = 3
-
-        if self.request_id not in responses:
-            print(f"Could not find request id '{self.request_id}' key in responses. responses size={len(responses)}")
-            return []
-
-        if responses[self.request_id] is None:
-            print("Trying to get a response from NONE queue...")
-            return []
-
-        return responses[self.request_id].get(block=True, timeout=timeout)
+from client_module import ZmqClient
+from client_receiver import receiver_stop_event
 
 
 class ClientModel:
@@ -154,7 +94,7 @@ class ClientModel:
         self.client.request("getAvailableSeats", self.movie, self.theater)
         # print("... requested list of available seats (next, we'll book some seats) ...")
         if self.booked_the_seats:
-            print("****** Already booked seats *********")
+            print("[enter:get_available_seats_state] already booked seats")
             self.leave()
         else:
             self.choose_seats()
@@ -250,116 +190,8 @@ transitions = [
 ]
 
 
-def wait_for_response(socket: zmq.Socket) -> bool:
-    # print("Waiting for request to be sent...")
-    expect_response_event.wait()
-    expect_response_event.clear()
-
-    if receiver_stop_event.is_set():
-        print("... waiting stopped (receiver probably completed).")
-        return False
-
-    # print("... expecting RESPONSE ...")
-
-    for i in range(1, 100):
-        with zmqLock:
-            if socket.poll(timeout=100):
-                # print("... found a response!")
-                return True
-
-    print("Waited too long... I suppose this means it's bad!")
-    return False
-
-
-def get_next_response(socket: zmq.Socket) -> [dict, None]:
-    # print("ZMQ lock...")
-    with zmqLock:
-        reply_str = socket.recv_string()
-    # print("... ZMQ unlock")
-
-    # reply_str = socket.recv_string()
-    return json.loads(reply_str)
-
-
-def enqueue_response(resp: dict):
-    print("Received RESPONSE:",)
-    print("    ID=", resp["request_id"])
-    print("    RESPONSE=", resp["response"])
-
-    key = resp["request_id"]
-
-    responses[key].put(resp["response"])
-    print(f"Responses in QUEUE: {responses[key].qsize()}")
-
-
-@exit_on_error
-def receiver_thread_handler(socket: zmq.Socket, stop_event: threading.Event):
-    print("Started receiver_thread_handler...")
-    while not stop_event.is_set():
-        if not wait_for_response(socket):
-            receiver_stop_event.set()
-            break
-
-        # print("Retrieving response...")
-        response = get_next_response(socket)
-        # print("... Response retrieved: ", response)
-        if not response:
-            print("Bad or no response => leaving...")
-            receiver_stop_event.set()
-            break
-
-        # print("******** Got response: ", response)
-
-        enqueue_response(response)
-
-    print("Worker exited. Please say bye!")
-
-
-
-print("************** Type 'bye' to stop!!! **************")
-
-context = zmq.Context()
-
-socket = context.socket(zmq.DEALER)
-
-socket.setsockopt(zmq.RCVTIMEO, 5000) 
-socket.setsockopt(zmq.SNDTIMEO, 3000) 
-socket.setsockopt_string(zmq.IDENTITY, CLIENT_NAME)
-
-socket.connect("tcp://localhost:52345")
-
-request_id_a = str(uuid.uuid4())
-# request_id_b = str(uuid.uuid4())
-
-print(f"request_id A: {request_id_a}")
-# print(f"request_id B: {request_id_b}")
-
-responses[request_id_a] = queue.Queue()
-# responses[request_id_b] = []
-
-zmqClient = ZmqClient(request_id_a, socket)
-clientModel = ClientModel(zmqClient, "Mark", 2)
-machine = Machine(model=clientModel, states=states, transitions=transitions, initial='initial')
-
-receiver_thread = threading.Thread(target=receiver_thread_handler, args=(socket, receiver_stop_event,))
-receiver_thread.start()
-
-print("\n\n")
-clientModel.request_playing_movies()
-
-print("FSM finished")
-receiver_stop_event.set()
-expect_response_event.set()
-
-try:
-    while True:
-        line = input().strip()
-        if line.lower() == "bye":
-            break
-except BaseException as e:
-    print(f"\nError {type(e).__name__}: \"{str(e)}\"")
-
-receiver_thread.join()
-
-
-print("Bye!")
+def make_state_machine(zmq_client: ZmqClient, client_name: str, seats_wanted: int):
+    clientModel = ClientModel(zmq_client, client_name, seats_wanted)
+    machine = Machine(model=clientModel, states=states, transitions=transitions, initial='initial')
+    
+    clientModel.request_playing_movies()
