@@ -1,4 +1,5 @@
 import zmq
+import threading
 
 from transitions import Machine
 
@@ -195,3 +196,15 @@ def make_and_run_state_machine(zmq_client: ZmqClient, client_name: str, seats_wa
     machine = Machine(model=clientModel, states=states, transitions=transitions, initial='initial')
     
     clientModel.request_playing_movies()
+
+
+def client_thread_handler(zmq_client: ZmqClient, client_name: str, seats_wanted: int):
+    make_and_run_state_machine(zmq_client, client_name, seats_wanted)
+
+
+def start_client_thread(socket: zmq.Socket, request_id: str, client_name: str, seats_wanted: int):
+    zmq_client = ZmqClient(request_id, socket)
+
+    client_thread = threading.Thread(target=client_thread_handler, args=(zmq_client, client_name, seats_wanted))
+    client_thread.start()
+    return client_thread

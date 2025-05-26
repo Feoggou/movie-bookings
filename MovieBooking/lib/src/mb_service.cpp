@@ -28,7 +28,7 @@ namespace movie_booking {
 	}
 
 	std::vector<std::string> Service::getPlayingMovies() const
-	{	
+	{
 		auto view = m_store->theatersByMovie
 			| std::views::filter([](const auto& pair) {
 					return !pair.second.empty()
