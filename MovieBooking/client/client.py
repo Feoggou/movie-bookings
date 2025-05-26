@@ -7,25 +7,17 @@ import client_module
 import client_fsm as fsm
 from client_module import ZmqClient, responses
 from zmq_network import create_socket
-from client_receiver import start_receiver_thread, register_request_id, stop_receiver_thread, cancel_active_requests
+from client_receiver import start_receiver_thread, stop_receiver_thread, cancel_active_requests
 
 def main(*args):
     print("************** Type 'bye' to stop!!! **************")
     print("\n\n")
 
-    request_id_a = str(uuid.uuid4())
-    print(f"request_id A: {request_id_a}")
-
-    register_request_id(request_id_a)
-
     socket = create_socket()
-    print("socket=", socket)
 
     recv_thread = start_receiver_thread(socket)
 
-    client_thread_a = fsm.start_client_thread(socket, request_id_a, "Mark", seats_wanted=2)
-
-    client_thread_a.join()
+    fsm.run_client_thread(socket)
 
     print("FSM finished")
     cancel_active_requests()

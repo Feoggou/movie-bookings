@@ -26,7 +26,7 @@ class ZmqClient:
 
     def get_response(self, timeout=None) -> list:
         if timeout is None:
-            timeout = 3
+            timeout = 6
 
         if self.request_id not in responses:
             print(f"Could not find request id '{self.request_id}' key in responses. responses size={len(responses)}")

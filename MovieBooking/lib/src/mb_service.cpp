@@ -13,8 +13,6 @@
 #include <chrono>
 
 namespace movie_booking {
-	std::atomic<bool> first_client = true;
-
 	Service::Service()
 		: m_store(std::make_unique<Store>())
 	{
@@ -103,21 +101,7 @@ namespace movie_booking {
 
 	std::vector<size_t> SyncedService::bookSeats(std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats)
 	{
-		std::cerr << (first_client ? "First client: " : "Second client: ") << "Locking..." << std::endl;
-
 		std::unique_lock lock(m_rw_mutex);
-
-		std::cerr << "...Locked" << std::endl;
-
-		if (first_client) {
-			std::cerr << "First client => sleep for 5 seconds..." << std::endl;
-			std::this_thread::sleep_for(std::chrono::seconds(5));
-			first_client = false;
-			std::cerr << "... woke up" << std::endl;
-		}
-		else {
-			std::cerr << "Second client => not sleeping!" << std::endl;
-		}
 
 		return Service::bookSeats(client, movie, theater, seats);
 	}
