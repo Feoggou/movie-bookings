@@ -190,7 +190,7 @@ transitions = [
 ]
 
 
-def make_state_machine(zmq_client: ZmqClient, client_name: str, seats_wanted: int):
+def make_and_run_state_machine(zmq_client: ZmqClient, client_name: str, seats_wanted: int):
     clientModel = ClientModel(zmq_client, client_name, seats_wanted)
     machine = Machine(model=clientModel, states=states, transitions=transitions, initial='initial')
     

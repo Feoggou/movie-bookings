@@ -24,7 +24,7 @@ def main(*args):
     recv_thread = start_receiver_thread(socket)
 
     zmqClient = ZmqClient(request_id_a, socket)
-    fsm.make_state_machine(zmqClient, "Mark", seats_wanted=2)
+    fsm.make_and_run_state_machine(zmqClient, "Mark", seats_wanted=2)
 
     print("FSM finished")
     cancel_active_requests()
