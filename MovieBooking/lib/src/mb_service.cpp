@@ -1,7 +1,5 @@
 #include "mb_service.hpp"
 
-#include "utils.hpp"
-
 #include <iostream>
 #include <ranges>
 #include <string>
@@ -49,8 +47,8 @@ namespace movie_booking {
 	std::vector<size_t> Service::getAvailableSeats(std::string_view movie, std::string_view theater) const
 	{
 		const auto &theaters = m_store->theatersByMovie[std::string(movie)];
-		auto found_theater = utils::find_if_optional(theaters, [=](const Theater& t) { return t.name == theater; });
-		if (!found_theater)
+		auto found_theater = std::ranges::find_if(theaters, [=](const Theater& t) { return t.name == theater; });
+		if (found_theater == std::ranges::end(theaters))
 			return {};
 
 		auto indices = std::views::iota(0u, found_theater->seats.size())

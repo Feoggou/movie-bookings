@@ -18,7 +18,6 @@ target_sources(MovieBookingLib
   "src/mb_service.hpp"
   "src/workers.hpp"
   "src/cmd.hpp"
-  "src/utils.hpp"
   PUBLIC
   FILE_SET ixx_modules TYPE CXX_MODULES FILES
   "include/mbooking/movie_booking.ixx"
