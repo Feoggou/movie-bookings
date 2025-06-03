@@ -11,16 +11,12 @@ target_sources(MovieBookingLib
   "src/movie_booking.cpp"
   "src/mb_service.cpp"
   "src/workers.cpp"
-  "src/zeromq_sync.cpp"
-  "src/zeromq_async.cpp"
   "src/cmd.cpp"
   PRIVATE
   FILE_SET header_files TYPE HEADERS FILES
   "src/movie_booking.hpp"
   "src/mb_service.hpp"
   "src/workers.hpp"
-  "src/zeromq_sync.hpp"
-  "src/zeromq_async.hpp"
   "src/cmd.hpp"
   "src/utils.hpp"
   PUBLIC
