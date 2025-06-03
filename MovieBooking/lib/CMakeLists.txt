@@ -7,13 +7,25 @@ target_include_directories(MovieBookingLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/i
 
 target_sources(MovieBookingLib
   PRIVATE
-  "src/movie_booking.cpp" "src/movie_booking.hpp"
-  "src/mb_service.cpp" "src/mb_service.hpp"
-  "src/workers.cpp" "src/workers.hpp"
-  "src/zeromq_sync.cpp" "src/zeromq_sync.hpp"
-  "src/zeromq_async.cpp" "src/zeromq_async.hpp"
-  "src/cmd.cpp" "src/cmd.hpp"
+  "src/movie_booking.ixx"
+  "src/movie_booking.cpp"
+  "src/mb_service.cpp"
+  "src/workers.cpp"
+  "src/zeromq_sync.cpp"
+  "src/zeromq_async.cpp"
+  "src/cmd.cpp"
+  PRIVATE
+  FILE_SET header_files TYPE HEADERS FILES
+  "src/movie_booking.hpp"
+  "src/mb_service.hpp"
+  "src/workers.hpp"
+  "src/zeromq_sync.hpp"
+  "src/zeromq_async.hpp"
+  "src/cmd.hpp"
   "src/utils.hpp"
+  PUBLIC
+  FILE_SET ixx_modules TYPE CXX_MODULES FILES
+  "include/mbooking/movie_booking.ixx"
 )
 
 target_compile_features(MovieBookingLib PRIVATE cxx_std_20)
