@@ -27,7 +27,7 @@ message(STATUS "Boost libraries: ${Boost_LIBRARIES}")
 find_package(nlohmann_json CONFIG REQUIRED)
 message(STATUS "Found nlohmann_json version: ${nlohmann_json_VERSION}")
 
-find_package(Doxygen REQUIRED)
+# find_package(Doxygen REQUIRED)
 
 enable_testing()
 
@@ -36,11 +36,11 @@ add_subdirectory ("src")
 add_subdirectory ("lib")
 add_subdirectory ("tests")
 
-add_custom_target(doc
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Generating documentation with Doxygen"
-    VERBATIM
-)
+# add_custom_target(doc
+#     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#     COMMENT "Generating documentation with Doxygen"
+#     VERBATIM
+# )
 
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs/html DESTINATION share/doc)
+# install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs/html DESTINATION share/doc)
