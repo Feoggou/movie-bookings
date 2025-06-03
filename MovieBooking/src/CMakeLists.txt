@@ -3,7 +3,10 @@
 #
 
 # Add source to this project's executable.
-add_executable (MovieBooking "main.cpp" )
+add_executable (MovieBooking
+"main.cpp"
+"zero_mq.cpp" "zero_mq.hpp"
+)
 
 target_include_directories(MovieBooking PUBLIC "${CMAKE_SOURCE_DIR}/lib")
 
