@@ -1,4 +1,4 @@
-//module;
+module;
 
 /**
  * @file api.ixx

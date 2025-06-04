@@ -12,13 +12,11 @@
 import mbooking;
 
 
-using namespace std;
-
 int main()
 {
     std::cerr << "Starting..." << std::endl;
 
-    movie_booking::create_service(zeromq_async_reply);
+    mbooking::create_service(zeromq_async_reply);
 
     zeromq_async_main([](std::string_view client_id, std::string_view received_msg) {
         nlohmann::json json = nlohmann::json::parse(received_msg);
