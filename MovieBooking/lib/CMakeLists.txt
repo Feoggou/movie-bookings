@@ -22,6 +22,7 @@ target_sources(MovieBookingLib
   FILE_SET ixx_modules TYPE CXX_MODULES FILES
   "include/mbooking/movie_booking.ixx"
   "src/api.ixx"
+  "src/mb_service.ixx"
 )
 
 target_compile_features(MovieBookingLib PRIVATE cxx_std_20)
