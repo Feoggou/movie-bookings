@@ -7,7 +7,7 @@ target_include_directories(MovieBookingLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/i
 
 target_sources(MovieBookingLib
   PRIVATE
-  "src/movie_booking.ixx"
+  "src/movie_booking.cxx"
   "src/movie_booking.cpp"
   "src/mb_service.cpp"
   "src/workers.cpp"

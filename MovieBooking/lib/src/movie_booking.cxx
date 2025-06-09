@@ -11,8 +11,6 @@ module;
 #include <memory>
 #include <iostream>
 
-// TODO: Only for VC++
-#pragma warning(disable: 4844)
 module mbooking;
 
 import :api;

@@ -10,13 +10,16 @@
       "name": "windows-base",
       "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
+      "binaryDir": "${sourceDir}/out/build-clang20/${presetName}",
+      "installDir": "${sourceDir}/out/install-clang20/${presetName}",
       "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/clang-20/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "C:/clang-20/bin/clang++.exe",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
         "CMAKE_CXX_STANDARD": "20",
-        "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "ON"
       },
       "environment": {
         "VCPKG_ROOT": "${sourceDir}/external/vcpkg"

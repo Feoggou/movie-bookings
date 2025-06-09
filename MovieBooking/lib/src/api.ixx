@@ -15,7 +15,7 @@ module;
 #include <chrono>
 #include <variant>
 
-export module mbooking:api;
+module mbooking:api;
 
 namespace movie_booking
 {
