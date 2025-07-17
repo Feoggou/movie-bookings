@@ -23,6 +23,7 @@ target_sources(MovieBookingLib
   "include/mbooking/movie_booking.ixx"
   "src/api.ixx"
   "src/mb_service.ixx"
+  "src/workers.ixx"
 )
 
 target_compile_features(MovieBookingLib PRIVATE cxx_std_20)
