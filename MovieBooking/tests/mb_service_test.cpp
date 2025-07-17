@@ -1,11 +1,11 @@
-#include "src/mb_service.hpp"
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
 #include <ranges>
 
-using namespace movie_booking;
+import mbooking;
+
+using namespace mbooking;
 
 namespace {
 

@@ -16,3 +16,5 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
 endif()
 
 target_link_libraries(MovieBooking PRIVATE MovieBookingLib nlohmann_json::nlohmann_json "cppzmq-static" Boost::boost)
+
+target_compile_features(MovieBooking PRIVATE cxx_std_20)

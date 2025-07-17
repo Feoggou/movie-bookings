@@ -1,7 +1,5 @@
 #include "cmd.hpp"
 
-#include "mb_service.hpp"
-
 #include <mbooking/movie_booking.h>
 
 #include <iostream>
@@ -17,7 +15,7 @@ static std::mutex g_mutex;
 static std::jthread reply_thread;
 
 namespace movie_booking {
-    static SyncedService service;
+    static mbooking::SyncedService service;
     std::unique_ptr<API> g_API;
 
     void execute_command(const ID &id, const std::string& command_name, const nlohmann::json& args)

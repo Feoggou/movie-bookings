@@ -12,9 +12,9 @@ module;
 #include <map>
 #include <shared_mutex>
 
-module mbooking:service;
+export module mbooking:service;
 
-namespace mbooking
+export namespace mbooking
 {
     struct Theater
     {

@@ -13,6 +13,8 @@
 #include <chrono>
 #include <variant>
 
+import mbooking;
+
  /**
   * @namespace movie_booking
   * @brief Contains utility functions for the mylib library.
@@ -69,7 +71,7 @@ namespace movie_booking
         using Future = FutureWrapper<Result>;
         using SharedFuture = std::shared_ptr<Future>;
 
-        explicit API(Service& service) : m_service(service) {}
+        explicit API(mbooking::Service& service) : m_service(service) {}
         /**
          * @brief Get a list of currently playing movies.
          *
@@ -97,6 +99,6 @@ namespace movie_booking
         SharedFuture bookSeats(const ID& id, std::string_view client, std::string_view movie, std::string_view theater, const std::vector<size_t>& seats);
 
     private:
-        Service& m_service;
+        mbooking::Service& m_service;
     };
 }

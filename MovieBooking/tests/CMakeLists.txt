@@ -9,5 +9,7 @@ target_link_libraries(
   GTest::gmock_main
 )
 
+target_compile_features(moviebooking_test PRIVATE cxx_std_20)
+
 include(GoogleTest)
 gtest_discover_tests(moviebooking_test)
