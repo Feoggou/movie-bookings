@@ -5,8 +5,11 @@ module;
 #include <functional>
 #include <vector>
 
-module mbooking:workers;
+export module mbooking:workers;
 
-void start_workers();
+export void start_workers();
 
-void request_command(std::function<void()> &&func);
+export void request_command(std::function<void()> &&func);
+
+
+

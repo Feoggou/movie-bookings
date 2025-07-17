@@ -11,14 +11,12 @@ target_sources(MovieBookingLib
   "src/movie_booking.cpp"
   "src/mb_service.cpp"
   "src/mb_service.cxx"
-  "src/workers.cpp"
   "src/workers.cxx"
   "src/cmd.cpp"
   PRIVATE
   FILE_SET header_files TYPE HEADERS FILES
   "src/movie_booking.hpp"
   "src/mb_service.hpp"
-  "src/workers.hpp"
   "src/cmd.hpp"
   PUBLIC
   FILE_SET ixx_modules TYPE CXX_MODULES FILES

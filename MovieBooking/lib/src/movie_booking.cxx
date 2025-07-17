@@ -1,7 +1,6 @@
 module;
 
 #include "cmd.hpp"
-#include "workers.hpp"
 
 #include <zmq_addon.hpp>
 
@@ -14,6 +13,7 @@ module mbooking;
 
 import :api;
 import :service;
+import :workers;
 
 namespace mbooking {
 

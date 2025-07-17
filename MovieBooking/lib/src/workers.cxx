@@ -1,4 +1,4 @@
-#include "workers.hpp"
+module;
 
 #include <iostream>
 #include <thread>
@@ -8,6 +8,9 @@
 #include <future>
 #include <functional>
 #include <memory>
+
+module mbooking;
+import :workers;
 
 std::mutex mtx;
 std::condition_variable cv;

@@ -1,5 +1,7 @@
 #include "movie_booking.hpp"
-#include "workers.hpp"
+
+#include "mb_service.hpp"
+#include "cmd.hpp"
 
 #include <iostream>
 #include <thread>
@@ -9,6 +11,8 @@
 #include <future>
 #include <functional>
 #include <memory>
+
+import mbooking;
 
 
 namespace movie_booking {
