@@ -12,7 +12,7 @@ module;
 #include <map>
 #include <shared_mutex>
 
-module movie_booking:service;
+module mbooking:service;
 
 namespace movie_booking
 {

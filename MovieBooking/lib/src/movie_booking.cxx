@@ -1,6 +1,5 @@
 module;
 
-#include "mb_service.hpp"
 #include "cmd.hpp"
 #include "workers.hpp"
 
@@ -14,6 +13,7 @@ module;
 module mbooking;
 
 import :api;
+import :service;
 
 namespace mbooking {
 

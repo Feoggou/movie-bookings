@@ -5,8 +5,6 @@ module;
  * @brief Not really an API. Refactoring is in progres...
  */
 
-#include "mb_service.hpp"
-
 #include <functional>
 #include <vector>
 #include <string>
@@ -16,6 +14,7 @@ module;
 #include <variant>
 
 module mbooking:api;
+import :service;
 
 namespace movie_booking
 {
