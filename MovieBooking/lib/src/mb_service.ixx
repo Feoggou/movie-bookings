@@ -14,7 +14,7 @@ module;
 
 module mbooking:service;
 
-namespace movie_booking
+namespace mbooking
 {
     struct Theater
     {

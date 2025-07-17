@@ -17,15 +17,15 @@ import :service;
 
 namespace mbooking {
 
-std::unique_ptr<movie_booking::API> g_API;
+std::unique_ptr<mbooking::API> g_API;
 
 namespace {
-    movie_booking::SyncedService service;
+    mbooking::SyncedService service;
 }
 
 void create_service(std::function<void(std::string_view, std::string_view)> process_reply)
 {
-    g_API = std::make_unique<movie_booking::API>(service);
+    g_API = std::make_unique<mbooking::API>(service);
 
     movie_booking::start_reply_thread(process_reply);
     ::start_workers();

@@ -16,7 +16,7 @@ module;
 module mbooking:api;
 import :service;
 
-namespace movie_booking
+namespace mbooking
 {
     struct ID
     {
