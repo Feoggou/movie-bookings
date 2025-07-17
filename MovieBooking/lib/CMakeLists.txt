@@ -10,6 +10,7 @@ target_sources(MovieBookingLib
   "src/movie_booking.cxx"
   "src/movie_booking.cpp"
   "src/mb_service.cpp"
+  "src/mb_service.cxx"
   "src/workers.cpp"
   "src/workers.cxx"
   "src/cmd.cpp"
